@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
  avatar TEXT NOT NULL DEFAULT '',
  password_hash TEXT,
  password_salt TEXT,
- provider TEXT NOT NULL CHECK(provider IN ('email','google')),
+ provider TEXT NOT NULL CHECK(provider IN ('email','google','discord')),
  provider_id TEXT UNIQUE,
  role TEXT NOT NULL DEFAULT 'user',
  status TEXT NOT NULL DEFAULT 'active',

@@ -1,7 +1,8 @@
-/* Ohio Trade Lab public runtime configuration. Never place secrets in this file. */
+/* Public runtime configuration. OAuth client IDs are loaded safely from /api/auth/config. */
 window.OTL_CONFIG = Object.freeze({
   apiBase: '/api',
-  forceBackend: false,
+  forceBackend: true,
   googleClientId: '',
-  discordEnabled: true
+  discordEnabled: true,
+  presenceIntervalMs: 30000
 });

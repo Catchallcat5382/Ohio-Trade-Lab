@@ -309,7 +309,7 @@ input:focus,select:focus{border-color:#824fc0}
    </div>
   </div>
   <div class="hubNoticeRow"><button id="notifyBtn" class="topBtn">TURN ON NOTIFICATIONS</button><span id="notifyState">Browser notifications are off.</span></div>
-  <div class="onlineModeNote" id="onlineModeNote">Data saves automatically. With the included Pages Function and D1 binding, accounts, listings, bids, rooms, and messages are shared across devices. Without D1, local browser mode remains available for testing.</div>
+  <div id="livePresence" class="livePresence"><b><span class="presenceDot"></span><span id="presenceTotal">0</span> ONLINE</b><span>GUESTS <strong id="presenceGuests">0</strong></span><span>USERS <strong id="presenceUsers">0</strong></span><span>STAFF <strong id="presenceStaff">0</strong></span></div><div class="onlineModeNote" id="onlineModeNote">Data saves automatically. With the included Pages Function and D1 binding, accounts, listings, bids, rooms, and messages are shared across devices. Without D1, local browser mode remains available for testing.</div>
   <div id="hubLocked" class="hubLocked"><div><img src="assets/ohio-trade-lab-logo.png" style="width:150px;height:100px;object-fit:contain" alt=""><h2>ACCOUNT REQUIRED</h2><p>You must sign in before using the Online Hub. Choose email, Google, or Discord.</p><button id="hubLockedLogin" class="onlinePrimary">SIGN IN / SIGN UP</button></div></div>
   <div id="hubContent" hidden>
    <div class="onlineTabs"><button class="onlineTab active" data-online-view="market">TRADE MARKET</button><button class="onlineTab" data-online-view="create">POST TRADE</button><button class="onlineTab" data-online-view="auction">AUCTIONS</button><button class="onlineTab" data-online-view="inbox">INBOX & ROOMS</button></div>
@@ -1433,6 +1433,32 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
  window.otlDevToggleUser=async(id,statusValue)=>{try{await request('/admin/users/'+id+'/status',{method:'POST',body:JSON.stringify({status:statusValue})});openDeveloper()}catch(e){status(e.message)}};
  window.otlDevRemoveListing=async id=>{try{await request('/admin/listings/'+id,{method:'DELETE'});openDeveloper();refresh()}catch(e){status(e.message)}};
+})();
+</script>
+
+
+<style id="v41-presence-oauth">
+.livePresence{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:10px 0;padding:10px 13px;border:1px solid #314762;border-radius:10px;background:#091322;color:#9fb0c7;font-size:11px}.livePresence b{color:#e8f4ff}.livePresence strong{color:#fff;margin-left:4px}.presenceDot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#42df83;box-shadow:0 0 12px #42df83;margin-right:7px}.hubAvatar,.accountAvatar{object-fit:contain!important;object-position:center!important;background:#111c31!important;padding:2px;box-sizing:border-box}.oauthHelp{font-size:10px;color:#8fa2ba;margin-top:8px;line-height:1.45}
+</style>
+<script id="v41-presence-oauth-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id), API=()=>window.OTL_CONFIG?.apiBase||'/api';
+const guestKey='otl_presence_visitor_v41';let visitor=localStorage.getItem(guestKey);if(!visitor){visitor=crypto.randomUUID();localStorage.setItem(guestKey,visitor)}
+let oauthConfig={googleClientId:'',discordEnabled:false};
+async function request(path,opt={}){const token=localStorage.getItem('otl_session_v37')||'';const r=await fetch(API()+path,{credentials:'same-origin',...opt,headers:{'content-type':'application/json',...(opt.headers||{}),...(token?{authorization:'Bearer '+token}:{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d}
+async function loadOAuthConfig(){try{oauthConfig=await request('/auth/config');window.OTL_RUNTIME_AUTH=oauthConfig}catch(e){oauthConfig={googleClientId:'',discordEnabled:false}}}
+function authMessage(t){const x=$('authMessage');if(x)x.textContent=t}
+async function googleSignIn(){
+ if(!oauthConfig.googleClientId)return authMessage('Google sign-in is not configured on the server yet. Add GOOGLE_CLIENT_ID in Cloudflare, then redeploy.');
+ if(!window.google?.accounts?.id)return authMessage('Google sign-in is still loading. Try again in a moment.');
+ google.accounts.id.initialize({client_id:oauthConfig.googleClientId,auto_select:false,cancel_on_tap_outside:false,callback:async response=>{try{const d=await request('/auth/google',{method:'POST',body:JSON.stringify({credential:response.credential})});if(d.token)localStorage.setItem('otl_session_v37',d.token);location.hash='online';location.reload()}catch(e){authMessage(e.message)}}});
+ google.accounts.id.prompt(note=>{if(note.isNotDisplayed?.()||note.isSkippedMoment?.())authMessage('Google blocked the quick prompt. Allow popups/cookies for this site and try again.')});
+}
+function discordSignIn(){if(!oauthConfig.discordEnabled)return authMessage('Discord sign-in is not configured on the server yet. Add DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in Cloudflare.');location.href=API()+'/auth/discord/start'}
+async function heartbeat(){try{const d=await request('/presence',{method:'POST',body:JSON.stringify({visitorId:visitor})});const c=d.counts||{};if($('presenceTotal'))$('presenceTotal').textContent=c.total||0;if($('presenceGuests'))$('presenceGuests').textContent=c.guest||0;if($('presenceUsers'))$('presenceUsers').textContent=c.user||0;if($('presenceStaff'))$('presenceStaff').textContent=c.staff||0}catch(e){}}
+async function boot(){await loadOAuthConfig();const g=$('googleLoginBtn'),d=$('discordLoginBtn');if(g)g.onclick=googleSignIn;if(d)d.onclick=discordSignIn;document.querySelectorAll('.hubAvatar').forEach(img=>{if(!img.getAttribute('src'))img.src='assets/default-avatar.svg';img.addEventListener('error',()=>img.src='assets/default-avatar.svg',{once:true})});const q=new URLSearchParams(location.search);if(q.get('auth_error')){const msg=q.get('auth_error');history.replaceState({},'',location.pathname+location.hash);setTimeout(()=>{document.getElementById('hubAuthModal')?.removeAttribute('hidden');authMessage(msg)},100)}await heartbeat();setInterval(heartbeat,Number(window.OTL_CONFIG?.presenceIntervalMs)||30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)heartbeat()});window.addEventListener('beforeunload',()=>{try{navigator.sendBeacon(API()+'/presence',new Blob([JSON.stringify({visitorId:visitor})],{type:'application/json'}))}catch(e){}})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
 
