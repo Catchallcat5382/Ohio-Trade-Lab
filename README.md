@@ -1,5 +1,9 @@
-# Ohio Trade Lab
+# Ohio Trade Lab V28
 
-Public trading-value website with organized skin, gem, collectible, trade-selector, and inventory sections.
+Public trading-value website build.
 
-V27 adds full section and subgroup bars across browsing tabs and trade selectors, corrects Rose item placement, and adds a scrollable desktop sidebar.
+## V28 changes
+- Weapon skins are grouped only by their skin set, such as Atomic, Void, or Cyberpunks.
+- Removed the extra heading for every individual gun inside a skin set.
+- The same simpler organization is used in the Skins tab and trade item selectors.
+- Item and gem categories keep their useful subgroup organization.
