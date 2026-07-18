@@ -1,0 +1,14 @@
+name = "ohio-trade-lab-api"
+main = "src.js"
+compatibility_date = "2026-07-18"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ohio-trade-lab"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[vars]
+GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID"
+# Add secrets with:
+# wrangler secret put SESSION_SECRET
+# wrangler secret put ADMIN_KEY

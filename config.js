@@ -1,4 +1,8 @@
-window.OTL_CONFIG = {
+/* Ohio Trade Lab runtime configuration.
+   The public site works immediately in local-browser mode.
+   Set apiBase to your deployed Worker URL to enable shared accounts and online data. */
+window.OTL_CONFIG = Object.freeze({
   apiBase: '/api',
-  googleClientId: 'PASTE_YOUR_GOOGLE_CLIENT_ID_HERE'
-};
+  forceBackend: false,
+  googleClientId: ''
+});
