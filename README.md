@@ -1,68 +1,36 @@
-# Ohio Trade Lab V37
+# Ohio Trade Lab V38
 
-## Included fixes
+## Fixed in this build
 
-- Images are shown in trade listings, auctioned items, highest bids, listing previews, and auction item search.
-- Trade market filters: search, listing type, section, skin set, rarity, minimum/maximum value, sort, and images-only.
-- Auction creation filters: preferred section, preferred set, and minimum bid value.
-- Skin bidding wording now clearly explains that bids are in-game skins/items, not payments through the website.
-- Highest-valued bid is shown. At expiration, the Worker automatically creates a private room for the owner and highest bidder.
-- Auctions remain **delivery pending** until the owner confirms delivery. The owner can cancel a failed delivery and rerun the auction.
-- Normal trade listings create a private room when accepted.
-- Account-only Online Hub with Google sign-in or email/password accounts.
-- Public display name plus visible `@account_username`; emails remain hidden from normal users.
-- Browser notification button and an account control to turn website notification popups off.
-- Larger top-left logo using `object-fit: contain`, without squishing or cropping.
-- Server-side authorization for listings, bids, rooms, messages, delivery confirmation, account identity, and moderation. Editing the page with Inspect Element cannot grant server permissions.
+- Repaired Online Hub button behavior, including auction item searching.
+- Trades, auctions, bids, private rooms, delivery confirmations, reruns, and removals now persist in local browser storage when the backend is not deployed.
+- Expired local auctions automatically select the highest-valued valid item bid, create a private room, and remain delivery-pending until the owner confirms delivery.
+- Added a real server-authorized Developer Mode dashboard for account moderation and listing removal.
+- Developer Mode is never enabled by HTML, CSS, localStorage, or Inspect Element. The Worker checks the authenticated account role on every developer endpoint.
+- Normal users cannot retrieve account emails. Emails appear only in the developer endpoint after server-side authorization.
 
-## Important deployment requirement
+## Important: shared saving requires the backend
 
-The visual website works immediately, but real shared accounts and online data require the included Cloudflare Worker and D1 database. A static Pages site alone cannot securely provide accounts, private chats, auctions, or administrator records.
+Local mode saves only in the current browser. To save across users/devices and provide real shared auctions, deploy the included Cloudflare Worker and D1 database.
 
-### 1. Create D1 and apply migrations
+### Deploy/update
 
 ```bat
 cd worker
-wrangler d1 create ohio-trade-lab
-```
-
-Paste the returned database ID into `worker/wrangler.toml`, then run:
-
-```bat
 wrangler d1 migrations apply ohio-trade-lab --remote
-```
-
-### 2. Add secrets
-
-```bat
 wrangler secret put SESSION_SECRET
-wrangler secret put ADMIN_KEY
-```
-
-Use long random values. Never place either secret in `index.html`, `config.js`, or GitHub.
-
-### 3. Google login
-
-Create a Google OAuth Web Client ID, add your production domain as an authorized JavaScript origin, and paste the client ID into both:
-
-- `config.js`
-- `worker/wrangler.toml` under `GOOGLE_CLIENT_ID`
-
-Email/password login does not require Google configuration.
-
-### 4. Deploy Worker
-
-```bat
-cd worker
 wrangler deploy
 ```
 
-Route `/api/*` on your website domain to this Worker, or put the Worker URL in `config.js` as `apiBase`.
+### Give only your account Developer Mode
 
-## Privacy and moderation
+1. Create your account normally on the deployed site.
+2. Open `worker/migrations/0003_developer_role.sql`.
+3. Replace `REPLACE_WITH_YOUR_EMAIL@example.com` with the exact email used by your account.
+4. Apply it:
 
-- Visitor-facing API responses never include email addresses.
-- The protected administrator endpoint is `GET /api/admin/users` and requires the `x-admin-key` header matching the `ADMIN_KEY` Worker secret.
-- The backend filters common unsafe links, payment requests, credentials, login codes, threats, and personal-information requests.
-- No automated filter is perfect. Add reporting, blocking, moderation review, retention limits, and a privacy policy before opening the service publicly.
-- Do not claim anonymity to users. Explain what account and moderation data is stored and how long it is retained.
+```bat
+wrangler d1 execute ohio-trade-lab --remote --file=migrations/0003_developer_role.sql
+```
+
+Do not put an admin password, secret key, or your email check inside `index.html` or `config.js`. Client-side checks can be changed with Inspect Element. V38 uses the authenticated role stored in D1 and rechecks it in the Worker.

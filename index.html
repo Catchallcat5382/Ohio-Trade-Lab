@@ -302,7 +302,7 @@ input:focus,select:focus{border-color:#824fc0}
  </div></section>
  <section id="online" class="page"><div class="panel onlinePanel">
   <div class="onlineHero"><div><h2>ONLINE TRADE HUB</h2><p>Post offers, accept public listings, run item-for-item auctions, and use a private trade room after both traders agree.</p></div><div class="onlineIdentity"><label>Display name<input id="onlineName" maxlength="24" placeholder="Your Roblox/display name"></label><button id="saveOnlineName" class="topBtn">SAVE NAME</button><button id="notifyBtn" class="topBtn">ENABLE NOTIFICATIONS</button></div></div>
-  <div class="onlineModeNote" id="onlineModeNote">Online mode connects to <code>/api</code> when the included Cloudflare Worker is deployed. Until then, this page uses local demo storage in this browser.</div>
+  <div class="onlineModeNote" id="onlineModeNote">Online mode connects to <code>/api</code> when the included Cloudflare Worker is deployed. Until then, this page uses persistent local browser storage. Shared accounts and cross-device saving require the deployed Worker.</div>
   <div class="onlineTabs"><button class="onlineTab active" data-online-view="market">TRADE MARKET</button><button class="onlineTab" data-online-view="create">POST TRADE</button><button class="onlineTab" data-online-view="auction">AUCTIONS</button><button class="onlineTab" data-online-view="inbox">INBOX & ROOMS</button></div>
   <div id="onlineMarket" class="onlineView active"><div class="toolbar"><input id="marketSearch" placeholder="Search listings, items, names, or descriptions..."><select id="marketType"><option value="">All listings</option><option value="trade">Trades</option><option value="auction">Auctions</option></select><button id="refreshMarket" class="topBtn">REFRESH</button></div><div id="marketCards" class="marketCards"></div></div>
   <div id="onlineCreate" class="onlineView"><div class="onlineFormGrid"><div class="onlineFormCard"><h3>POST CURRENT TRADE</h3><p>Your current calculator offers will be copied into the listing.</p><label>Title<input id="listingTitle" maxlength="70" placeholder="Trading Void M4A1 for fair offers"></label><label>Description<textarea id="listingDescription" maxlength="500" placeholder="Mention preferred guns, sets, quantities, or other useful details."></textarea></label><label>Expires<select id="listingExpiry"><option value="1">1 hour</option><option value="6">6 hours</option><option value="24" selected>24 hours</option><option value="72">3 days</option><option value="168">7 days</option></select></label><button id="postTradeBtn" class="onlinePrimary">POST TRADE</button></div><div class="onlinePreview"><h3>LISTING PREVIEW</h3><div class="offerPreview"><h4>YOU GIVE</h4><div id="postGivePreview" class="slotGrid"></div></div><div class="offerPreview"><h4>YOU WANT</h4><div id="postWantPreview" class="slotGrid"></div></div></div></div></div>
@@ -1299,5 +1299,111 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  function bind(){['hubLoginBtn','hubLockedLogin'].forEach(id=>$(id).onclick=()=>modal('hubAuthModal'));$('hubModalClose').onclick=()=>modal('hubAuthModal',false);$('hubAccountBtn').onclick=()=>modal('hubAccountModal');$('hubAccountClose').onclick=()=>modal('hubAccountModal',false);document.querySelectorAll('.authTab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.authTab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.authPane').forEach(x=>x.classList.toggle('active',x.id.toLowerCase()==='auth'+b.dataset.auth))});$('emailLoginBtn').onclick=()=>loginEmail(false);$('emailRegisterBtn').onclick=()=>loginEmail(true);$('googleLoginBtn').onclick=()=>{if(window.google?.accounts?.id&&window.OTL_CONFIG?.googleClientId){google.accounts.id.initialize({client_id:OTL_CONFIG.googleClientId,callback:async r=>{const d=await api('/auth/google',{method:'POST',body:JSON.stringify({credential:r.credential})});if(d?.token){setAuth(d.user,d.token);modal('hubAuthModal',false)}}});google.accounts.id.prompt()}else $('authMessage').textContent='Add your Google Client ID to config.js after deployment.'};$('logoutBtn').onclick=()=>{localStorage.removeItem(TOKEN_KEY);localStorage.removeItem('otl_local_uid');me=null;modal('hubAccountModal',false);renderAuth()};$('saveDisplayBtn').onclick=async()=>{const displayName=clean($('accountDisplay').value,24);const d=await api('/auth/profile',{method:'POST',body:JSON.stringify({displayName})});if(d?.user)me=d.user;else if(API==='/api'){me.displayName=displayName;const st=localState();st.users[me.id].displayName=displayName;saveLocal(st)}renderAuth();modal('hubAccountModal',false)};$('notifyBtn').onclick=async()=>{if('Notification'in window)await Notification.requestPermission();notifyState()};$('disableNotifyBtn').onclick=()=>{localStorage.setItem('otl_notifications_disabled','1');$('notifyState').textContent='Website notification popups are turned off. To revoke browser permission, use the lock icon beside the address bar.';modal('hubAccountModal',false)};document.querySelectorAll('.onlineTab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.onlineTab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.onlineView').forEach(x=>x.classList.remove('active'));$('online'+b.dataset.onlineView[0].toUpperCase()+b.dataset.onlineView.slice(1)).classList.add('active');renderPreview()});['marketSearch','marketType','marketSection','marketSet','marketRarity','marketMinValue','marketMaxValue','marketSort','marketImagesOnly'].forEach(id=>{$(id).oninput=renderMarket;$(id).onchange=renderMarket});$('clearMarketFilters').onclick=()=>{['marketSearch','marketType','marketSection','marketSet','marketRarity','marketMinValue','marketMaxValue'].forEach(id=>$(id).value='');$('marketImagesOnly').checked=true;renderMarket()};$('refreshMarket').onclick=loadHub;$('postTradeBtn').onclick=()=>postListing('trade');$('postAuctionBtn').onclick=()=>postListing('auction');$('auctionItemSearch').oninput=renderAuctionPicker();$('markInboxRead').onclick=async()=>{await api('/notifications/read',{method:'POST',body:'{}'});inbox=[];renderInbox()};notifyState();fillFilters();renderAuctionPicker();renderPreview()}
  document.addEventListener('DOMContentLoaded',()=>{bind();restore()});
 })();
-</script></body>
+</script>
+<style id="v38-persistence-developer-fixes">
+#developerModeBtn{display:none;border:1px solid #ffb52f;background:linear-gradient(180deg,#57380a,#2d1c05);color:#ffe7a4;border-radius:8px;padding:9px 12px;font-weight:900;cursor:pointer}
+#developerPanel{position:fixed;inset:4vh 4vw;z-index:10020;background:#07101d;border:1px solid #d79522;border-radius:14px;box-shadow:0 30px 90px #000d;display:none;overflow:hidden}
+#developerPanel.open{display:grid;grid-template-rows:auto 1fr}
+.devHead{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #3c475b;background:#111827}.devHead h2{margin:0;color:#ffd270}.devBody{padding:14px;overflow:auto}.devStats{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;margin-bottom:14px}.devStat{border:1px solid #3b4a62;border-radius:10px;padding:12px;background:#0b1423}.devStat b{display:block;font-size:24px;color:#fff}.devTable{width:100%;border-collapse:collapse}.devTable th,.devTable td{padding:9px;border-bottom:1px solid #25344b;text-align:left;font-size:12px}.devTable th{color:#8fa3bf}.devDanger{border:1px solid #be4453;background:#4a131b;color:white;border-radius:7px;padding:7px 9px;cursor:pointer}.saveBadge{display:inline-flex;align-items:center;gap:6px;color:#76dfa4;font-size:11px}.saveBadge::before{content:'●'}
+@media(max-width:760px){#developerPanel{inset:1vh 1vw}.devStats{grid-template-columns:repeat(2,1fr)}}
+</style>
+<div id="developerPanel" aria-hidden="true">
+ <div class="devHead"><div><h2>DEVELOPER MODE</h2><small>Server-authorized controls. Hidden from normal accounts.</small></div><button id="developerClose" class="topBtn">CLOSE</button></div>
+ <div class="devBody"><div id="devStats" class="devStats"></div><div id="devUsers"></div><div id="devListings" style="margin-top:18px"></div></div>
+</div>
+<script id="v38-persistence-developer-fixes-script">
+(()=>{
+ 'use strict';
+ const byId=id=>document.getElementById(id);
+ const safeJson=v=>{try{return JSON.parse(v)}catch{return null}};
+ const LOCAL_KEY_V38='otl_online_v38';
+ const OLD_LOCAL_KEYS=['otl_online_v37','otl_online_v36','otl_online_v35'];
+ const apiBase=()=>window.OTL_CONFIG?.apiBase||'/api';
+ const authToken=()=>localStorage.getItem('otl_session_v37')||'';
+ function migrateLocal(){
+   if(localStorage.getItem(LOCAL_KEY_V38))return;
+   for(const key of OLD_LOCAL_KEYS){const raw=localStorage.getItem(key);if(raw){localStorage.setItem(LOCAL_KEY_V38,raw);return}}
+   localStorage.setItem(LOCAL_KEY_V38,JSON.stringify({users:{},listings:[],rooms:{},notifications:[]}));
+ }
+ function state(){migrateLocal();const x=safeJson(localStorage.getItem(LOCAL_KEY_V38));return x&&typeof x==='object'?x:{users:{},listings:[],rooms:{},notifications:[]}}
+ function persist(x){localStorage.setItem(LOCAL_KEY_V38,JSON.stringify(x));localStorage.setItem('otl_online_v38_saved_at',String(Date.now()));showSaved()}
+ function showSaved(){const n=byId('onlineModeNote');if(n&&!n.querySelector('.saveBadge'))n.insertAdjacentHTML('beforeend',' <span class="saveBadge">Saved</span>')}
+ function currentUser(){const id=localStorage.getItem('otl_local_uid');return state().users?.[id]||window.me||null}
+ function idsToItems(ids){return (ids||[]).map(id=>(window.items||[]).find(x=>x.id===id)).filter(Boolean)}
+ function sumIds(ids){return idsToItems(ids).reduce((a,x)=>a+(Number(x.value)||0),0)}
+ function localFinalize(x){
+   const now=Date.now();
+   for(const l of x.listings||[]){
+     if(l.type!=='auction'||l.status!=='open'||Number(l.expires)>now)continue;
+     const best=(l.bids||[]).slice().sort((a,b)=>(b.value-a.value)||(a.created-b.created))[0];
+     if(!best){l.status='ended_no_bids';continue}
+     l.status='delivery_pending';l.winningBidId=best.id;
+     const roomId=crypto.randomUUID();
+     x.rooms[roomId]={id:roomId,listingId:l.id,title:l.title,status:'open',members:[l.ownerId,best.bidderId],membersDisplay:[l.ownerDisplay,best.bidderDisplay],messages:[{authorId:l.ownerId,author:'System',text:'Auction ended. Complete the in-game trade, then the owner must confirm delivery.',time:now,system:true}]};
+     x.notifications.push({id:crypto.randomUUID(),recipientId:l.ownerId,body:'Your auction ended with a winning item bid. Confirm delivery after the in-game trade.',roomId,created:now});
+     x.notifications.push({id:crypto.randomUUID(),recipientId:best.bidderId,body:'You won an auction. Open the private room to finish the in-game trade.',roomId,created:now});
+   }
+ }
+ async function request(path,opt={}){
+   const r=await fetch(apiBase()+path,{...opt,headers:{'content-type':'application/json',...(opt.headers||{}),...(authToken()?{authorization:'Bearer '+authToken()}:{})}});
+   const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d;
+ }
+ function isLocal(){return apiBase()==='/api' && !window.OTL_CONFIG?.forceBackend}
+ function status(t){const e=byId('status');if(e)e.textContent=t}
+ function refresh(){if(typeof window.loadHub==='function')window.loadHub();else location.reload()}
+ // Fix the broken auction search handler from V37.
+ document.addEventListener('DOMContentLoaded',()=>{
+   migrateLocal();showSaved();
+   const q=byId('auctionItemSearch');if(q)q.oninput=()=>window.renderAuctionPicker?.();
+   const postTrade=byId('postTradeBtn');const postAuction=byId('postAuctionBtn');
+   if(postTrade)postTrade.addEventListener('click',()=>setTimeout(showSaved,50));
+   if(postAuction)postAuction.addEventListener('click',()=>setTimeout(showSaved,50));
+   installDeveloperButton();
+   setInterval(()=>{if(isLocal()){const x=state();localFinalize(x);persist(x);if(typeof window.renderMarket==='function')window.renderMarket()}},15000);
+ },{once:true});
+ // Replace local hub storage functions used by the original code.
+ window.localState=state;window.saveLocal=persist;
+ window.otlAccept=async id=>{
+   try{
+     if(!isLocal()){const d=await request('/listings/'+id+'/accept',{method:'POST',body:'{}'});if(d.room)return window.roomOpen?.(d.room)}
+     const x=state(),me=currentUser(),l=x.listings.find(v=>v.id===id);if(!me||!l||l.type!=='trade'||l.status!=='open')throw Error('Trade is unavailable.');if(l.ownerId===me.id)throw Error('You cannot accept your own trade.');
+     l.status='accepted';const roomId=crypto.randomUUID();x.rooms[roomId]={id:roomId,listingId:id,title:l.title,status:'open',members:[l.ownerId,me.id],membersDisplay:[l.ownerDisplay,me.displayName],messages:[]};x.notifications.push({id:crypto.randomUUID(),recipientId:l.ownerId,body:`${me.displayName} accepted your trade.`,roomId,created:Date.now()});persist(x);status('Trade accepted and private room saved.');window.roomOpen?.(roomId);refresh();
+   }catch(e){status(e.message)}
+ };
+ window.otlBid=async id=>{
+   try{
+     const me=currentUser(),bid=(window.trade?.yours||[]).slice(0,8).map(x=>x.id);if(!me)throw Error('Log in first.');if(!bid.length)throw Error('Put your bid items in Your Offer first.');const value=sumIds(bid);
+     if(!isLocal()){await request('/listings/'+id+'/bid',{method:'POST',body:JSON.stringify({items:bid,value})});status('Bid saved.');return refresh()}
+     const x=state(),l=x.listings.find(v=>v.id===id);if(!l||l.type!=='auction'||l.status!=='open'||l.expires<=Date.now())throw Error('Auction is unavailable.');if(l.ownerId===me.id)throw Error('You cannot bid on your own auction.');if(value<(Number(l.minBidValue)||0))throw Error('Your bid is below the minimum value.');l.bids=l.bids||[];l.bids.push({id:crypto.randomUUID(),bidderId:me.id,bidderDisplay:me.displayName,bidderUsername:me.username,items:bid,value,created:Date.now()});persist(x);status('Bid saved.');refresh();
+   }catch(e){status(e.message)}
+ };
+ window.otlConfirmDelivery=async id=>{
+   try{if(!isLocal()){await request('/listings/'+id+'/confirm-delivery',{method:'POST',body:'{}'});return refresh()}const x=state(),me=currentUser(),l=x.listings.find(v=>v.id===id);if(!l||l.ownerId!==me?.id||l.status!=='delivery_pending')throw Error('Pending auction not found.');l.status='completed';l.completed=Date.now();Object.values(x.rooms).forEach(r=>{if(r.listingId===id)r.status='closed'});persist(x);status('Delivery confirmed. Auction completed and saved.');refresh()}catch(e){status(e.message)}
+ };
+ window.otlRerunAuction=async id=>{
+   try{if(!isLocal()){await request('/listings/'+id+'/rerun',{method:'POST',body:'{}'});return refresh()}const x=state(),me=currentUser(),l=x.listings.find(v=>v.id===id);if(!l||l.ownerId!==me?.id||l.status!=='delivery_pending')throw Error('Pending auction not found.');l.status='delivery_failed';const now=Date.now(),duration=Math.max(3600000,l.expires-l.created);x.listings.push({...l,id:crypto.randomUUID(),created:now,expires:now+duration,status:'open',bids:[],winningBidId:null});persist(x);status('Auction cancelled and rerun.');refresh()}catch(e){status(e.message)}
+ };
+ window.otlRemoveListing=async id=>{try{if(!isLocal())await request('/listings/'+id,{method:'DELETE'});else{const x=state(),me=currentUser(),l=x.listings.find(v=>v.id===id);if(!l||l.ownerId!==me?.id)throw Error('You do not own this listing.');l.status='removed';persist(x)}status('Listing removed and saved.');refresh()}catch(e){status(e.message)}};
+ async function installDeveloperButton(){
+   const host=byId('hubAccountBox')||document.querySelector('.hubAccountBox');if(!host)return;
+   let btn=byId('developerModeBtn');if(!btn){btn=document.createElement('button');btn.id='developerModeBtn';btn.textContent='DEVELOPER MODE';host.appendChild(btn)}
+   let user=window.me;try{if(!isLocal()){user=(await request('/auth/me')).user}}catch{}
+   if(user?.role==='developer'||user?.role==='admin'){btn.style.display='inline-block';btn.onclick=openDeveloper}else btn.style.display='none';
+   byId('developerClose').onclick=()=>byId('developerPanel').classList.remove('open');
+ }
+ async function openDeveloper(){
+   try{const d=await request('/admin/overview');renderDeveloper(d);byId('developerPanel').classList.add('open')}catch(e){status('Developer access denied: '+e.message)}
+ }
+ function renderDeveloper(d){
+   byId('devStats').innerHTML=[['Users',d.stats.users],['Open listings',d.stats.openListings],['Auctions',d.stats.auctions],['Rooms',d.stats.rooms]].map(([k,v])=>`<div class="devStat"><span>${k}</span><b>${v}</b></div>`).join('');
+   byId('devUsers').innerHTML='<h3>Accounts</h3><table class="devTable"><thead><tr><th>Public identity</th><th>Email (developer only)</th><th>Status</th><th>Action</th></tr></thead><tbody>'+d.users.map(u=>`<tr><td>${escapeHtml(u.display_name)}<br><small>@${escapeHtml(u.username)}</small></td><td>${escapeHtml(u.email)}</td><td>${escapeHtml(u.status)}</td><td>${u.role==='developer'?'Protected':`<button class="devDanger" onclick="otlDevToggleUser('${u.id}','${u.status==='active'?'suspended':'active'}')">${u.status==='active'?'SUSPEND':'RESTORE'}</button>`}</td></tr>`).join('')+'</tbody></table>';
+   byId('devListings').innerHTML='<h3>Recent listings</h3><table class="devTable"><thead><tr><th>Title</th><th>Owner</th><th>Type</th><th>Status</th><th>Action</th></tr></thead><tbody>'+d.listings.map(l=>`<tr><td>${escapeHtml(l.title)}</td><td>@${escapeHtml(l.username)}</td><td>${escapeHtml(l.type)}</td><td>${escapeHtml(l.status)}</td><td><button class="devDanger" onclick="otlDevRemoveListing('${l.id}')">REMOVE</button></td></tr>`).join('')+'</tbody></table>';
+ }
+ function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ window.otlDevToggleUser=async(id,statusValue)=>{try{await request('/admin/users/'+id+'/status',{method:'POST',body:JSON.stringify({status:statusValue})});openDeveloper()}catch(e){status(e.message)}};
+ window.otlDevRemoveListing=async id=>{try{await request('/admin/listings/'+id,{method:'DELETE'});openDeveloper();refresh()}catch(e){status(e.message)}};
+})();
+</script>
+
+</body>
 </html>
