@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#09111f">
+  <title>Ohio Trade Lab</title>
+  <meta name="description" content="Ohio item values, fair trade calculator, inventory analysis, and trade listings.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home"><span class="logo">OT</span><span>Ohio Trade Lab</span></a>
+    <nav id="nav">
+      <button data-tab="home" class="active">Home</button>
+      <button data-tab="database">Database</button>
+      <button data-tab="trade">Trade Calculator</button>
+      <button data-tab="inventory">Inventory</button>
+      <button data-tab="market">Trade Listings</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="hero">
+        <div>
+          <p class="eyebrow">COMMUNITY VALUE TOOL</p>
+          <h1>Build fairer Ohio trades.</h1>
+          <p>Search confirmed values, compare both sides of a trade, analyze your inventory, and create trade listings.</p>
+          <div class="hero-actions">
+            <button class="primary" data-go="trade">Open Trade Calculator</button>
+            <button class="secondary" data-go="database">Browse Database</button>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="stat"><b id="statItems">0</b><span>Official items</span></div>
+          <div class="stat"><b id="statSets">0</b><span>Collections</span></div>
+          <div class="stat"><b id="statTop">—</b><span>Highest value</span></div>
+        </div>
+      </div>
+      <div class="notice">
+        <b>Accuracy note:</b> values come from the uploaded Official Obscure's Values workbook. Unknown or conflicting data is not silently invented.
+      </div>
+      <div class="section-head"><h2>Highest-value items</h2></div>
+      <div id="topItems" class="cards"></div>
+    </section>
+
+    <section id="database" class="page">
+      <div class="page-title"><div><p class="eyebrow">VALUE DATABASE</p><h1>Confirmed item values</h1></div></div>
+      <div class="toolbar">
+        <input id="dbSearch" type="search" placeholder="Search item, set, or weapon…">
+        <select id="dbRarity"><option value="">All rarities</option></select>
+        <select id="dbSet"><option value="">All sets</option></select>
+        <select id="dbSort">
+          <option value="value-desc">Highest value</option>
+          <option value="value-asc">Lowest value</option>
+          <option value="demand-desc">Highest demand</option>
+          <option value="name">Name A–Z</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item</th><th>Set</th><th>Rarity</th><th>Value</th><th>Demand</th><th>Notes</th></tr></thead>
+          <tbody id="dbRows"></tbody>
+        </table>
+      </div>
+      <div id="dbCount" class="muted"></div>
+    </section>
+
+    <section id="trade" class="page">
+      <div class="page-title"><div><p class="eyebrow">FAIR TRADE ASSISTANT</p><h1>Compare both sides</h1></div><button id="clearTrade" class="danger">Clear trade</button></div>
+      <div class="trade-grid">
+        <article class="panel">
+          <div class="panel-head"><h2>Your offer</h2><b id="yourTotal">$0</b></div>
+          <div class="item-picker"><input id="yourSearch" placeholder="Search an item to add…"><div id="yourResults" class="results"></div></div>
+          <div id="yourItems" class="selected-list"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-head"><h2>Their offer</h2><b id="theirTotal">$0</b></div>
+          <div class="item-picker"><input id="theirSearch" placeholder="Search an item to add…"><div id="theirResults" class="results"></div></div>
+          <div id="theirItems" class="selected-list"></div>
+        </article>
+      </div>
+      <article id="tradeVerdict" class="verdict"></article>
+      <article class="panel">
+        <div class="panel-head"><h2>Recommended matching items</h2><span class="muted">Suggestions are based on value difference and demand.</span></div>
+        <div id="tradeSuggestions" class="suggestions"></div>
+      </article>
+    </section>
+
+    <section id="inventory" class="page">
+      <div class="page-title"><div><p class="eyebrow">INVENTORY ANALYSIS</p><h1>Your collection value</h1></div><div><button id="exportInventory" class="secondary">Export</button> <label class="secondary file-button">Import<input id="importInventory" type="file" accept=".json"></label></div></div>
+      <div class="inventory-layout">
+        <article class="panel inventory-add">
+          <h2>Add an item</h2>
+          <input id="inventorySearch" placeholder="Search database…">
+          <div id="inventoryResults" class="results"></div>
+        </article>
+        <article class="inventory-stats">
+          <div class="stat-card"><span>Total value</span><b id="inventoryValue">$0</b></div>
+          <div class="stat-card"><span>Total items</span><b id="inventoryCount">0</b></div>
+          <div class="stat-card"><span>Average demand</span><b id="inventoryDemand">—</b></div>
+          <div class="stat-card"><span>Most valuable</span><b id="inventoryTop">—</b></div>
+        </article>
+      </div>
+      <article class="panel">
+        <div class="panel-head"><h2>Inventory items</h2><button id="clearInventory" class="danger">Clear inventory</button></div>
+        <div id="inventoryItems" class="selected-list"></div>
+      </article>
+      <div class="analysis-grid">
+        <article class="panel"><h2>Value by rarity</h2><div id="rarityAnalysis" class="bars"></div></article>
+        <article class="panel"><h2>Largest collections</h2><div id="setAnalysis" class="bars"></div></article>
+      </div>
+    </section>
+
+    <section id="market" class="page">
+      <div class="page-title"><div><p class="eyebrow">TRADE LISTINGS</p><h1>Post what you're trading</h1></div></div>
+      <div class="notice"><b>Current mode:</b> listings are saved in this browser. To make them public for everyone, connect the included Supabase setup after deployment.</div>
+      <div class="market-grid">
+        <form id="listingForm" class="panel">
+          <h2>Create listing</h2>
+          <label>Roblox username<input id="listingUser" required maxlength="40" placeholder="Your username"></label>
+          <label>Offering<input id="listingOffer" required maxlength="160" placeholder="Items you are offering"></label>
+          <label>Looking for<input id="listingWant" required maxlength="160" placeholder="Items or value wanted"></label>
+          <label>Notes<textarea id="listingNotes" maxlength="300" placeholder="Optional details"></textarea></label>
+          <button class="primary" type="submit">Post trade</button>
+        </form>
+        <div>
+          <div class="toolbar"><input id="listingSearch" placeholder="Search listings…"></div>
+          <div id="listings" class="listing-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Ohio Trade Lab • Community-made value tool • Always double-check major trades</footer>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
