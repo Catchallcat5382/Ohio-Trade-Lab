@@ -1,12 +1,6 @@
 # Ohio Trade Lab
 
-A browser-based Roblox Ohio value database, trade calculator, and personal inventory tracker.
+A public trading value catalog with organized sections, item images, trade comparison tools, and a browser-saved inventory.
 
-## Features
-- Skin, gem, and item value browsing
-- Trade comparison and match suggestions
-- Personal inventory with quantity controls and total estimated value
-- Inventory JSON import/export
-- Local browser saving
-
-Open `index.html` locally or publish the folder with any static-site host.
+## Updating
+Replace the site files in your repository and run `push.bat`.
