@@ -9,7 +9,8 @@
     "items": 42,
     "withImages": 252,
     "officialImageCatalog": 201,
-    "sections": 11
+    "sections": 11,
+    "organization": "Tabs and trade selectors are grouped by section and subgroup."
   },
   "images": [
     {
@@ -19395,9 +19396,9 @@
     {
       "id": "item-602",
       "name": "Gold Rose",
-      "weapon": "Rose",
+      "weapon": "",
       "set": "ROSES",
-      "category": "Weapon Skin",
+      "category": "Item",
       "rarity": "Legendary",
       "value": 14500000,
       "demand": 8.0,
@@ -19407,15 +19408,15 @@
       "verified": true,
       "sourceCategory": "Special Items",
       "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/844c53e63_Screenshot2026-03-25at52354PM.png",
-      "section": "Weapon Skins",
-      "subcategory": "Special Items"
+      "section": "Roses",
+      "subcategory": "Special Roses"
     },
     {
       "id": "item-601",
       "name": "Void Rose",
-      "weapon": "Rose",
+      "weapon": "",
       "set": "ROSES",
-      "category": "Weapon Skin",
+      "category": "Item",
       "rarity": "Legendary",
       "value": 105000000,
       "demand": 12.0,
@@ -19425,8 +19426,8 @@
       "verified": true,
       "sourceCategory": "Special Items",
       "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1925f3005_Screenshot2026-03-25at52349PM.png",
-      "section": "Weapon Skins",
-      "subcategory": "Special Items"
+      "section": "Roses",
+      "subcategory": "Special Roses"
     },
     {
       "id": "item-178",

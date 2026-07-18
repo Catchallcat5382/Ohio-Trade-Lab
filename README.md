@@ -1,6 +1,5 @@
 # Ohio Trade Lab
 
-A public trading value catalog with organized sections, item images, trade comparison tools, and a browser-saved inventory.
+Public trading-value website with organized skin, gem, collectible, trade-selector, and inventory sections.
 
-## Updating
-Replace the site files in your repository and run `push.bat`.
+V27 adds full section and subgroup bars across browsing tabs and trade selectors, corrects Rose item placement, and adds a scrollable desktop sidebar.
