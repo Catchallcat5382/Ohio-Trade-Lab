@@ -1,3 +1,9 @@
+Ohio Trade Lab V33 rarity correction
+
+- There are zero Epic items.
+- Confirmed Mythics remain Mythic.
+- Every other item defaults to Legendary.
+
 # Ohio Trade Lab V32
 
 This build adds the eight-slot in-game trade layout, image-based match suggestions, and an Online Hub interface for public trades, item-for-item auctions, inbox notifications, and private trade rooms.
