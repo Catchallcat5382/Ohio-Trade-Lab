@@ -19,6 +19,22 @@ export default {async fetch(req,env){
  const url=new URL(req.url),path=url.pathname.replace(/^\/api/,"");
  if(path==="/health")return json({ok:true});
  try{
+
+  if(path==="/auth/discord/start"&&req.method==="GET"){
+   if(!env.DISCORD_CLIENT_ID||!env.DISCORD_CLIENT_SECRET||!env.DISCORD_REDIRECT_URI)return json({error:"Discord login is not configured"},503);
+   const state=uid();const redirect=new URL("https://discord.com/oauth2/authorize");redirect.searchParams.set("client_id",env.DISCORD_CLIENT_ID);redirect.searchParams.set("response_type","code");redirect.searchParams.set("redirect_uri",env.DISCORD_REDIRECT_URI);redirect.searchParams.set("scope","identify email");redirect.searchParams.set("state",state);
+   return new Response(null,{status:302,headers:{location:redirect.toString(),"set-cookie":`otl_discord_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`}});
+  }
+  if(path==="/auth/discord/callback"&&req.method==="GET"){
+   const code=url.searchParams.get("code"),state=url.searchParams.get("state"),cookie=(req.headers.get("cookie")||"").match(/(?:^|;\s*)otl_discord_state=([^;]+)/)?.[1];
+   if(!code||!state||!cookie||state!==cookie)return json({error:"Invalid Discord sign-in state"},400);
+   const form=new URLSearchParams({client_id:env.DISCORD_CLIENT_ID,client_secret:env.DISCORD_CLIENT_SECRET,grant_type:"authorization_code",code,redirect_uri:env.DISCORD_REDIRECT_URI});
+   const tr=await fetch("https://discord.com/api/oauth2/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});const td=await tr.json();if(!tr.ok||!td.access_token)return json({error:"Discord token exchange failed"},401);
+   const ur=await fetch("https://discord.com/api/users/@me",{headers:{authorization:`Bearer ${td.access_token}`}});const g=await ur.json();if(!ur.ok||!g.id||!g.email)return json({error:"Discord account verification failed"},401);
+   let u=await env.DB.prepare("SELECT * FROM users WHERE provider_id=? AND provider='discord'").bind(g.id).first();
+   if(!u){let username=normalizeUsername(g.username||"discord_user");if(username.length<3)username="user_"+g.id.slice(-6);while(await env.DB.prepare("SELECT id FROM users WHERE username=?").bind(username).first())username=username.slice(0,15)+Math.floor(Math.random()*9999);const id=uid(),avatar=g.avatar?`https://cdn.discordapp.com/avatars/${g.id}/${g.avatar}.png`:"";await env.DB.prepare("INSERT INTO users(id,email,username,display_name,avatar,provider,provider_id,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,normalizeEmail(g.email),username,clean(g.global_name||g.username||username,24),avatar,"discord",g.id,Date.now()).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first()}
+   const t=await tokenFor(env,u),site=String(env.PUBLIC_SITE_URL||url.origin).replace(/\/$/,"");return new Response(null,{status:302,headers:{location:`${site}/?auth_token=${encodeURIComponent(t)}#online`,"set-cookie":"otl_discord_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0"}});
+  }
   if(path==="/auth/register"&&req.method==="POST"){
    const b=await req.json(),email=normalizeEmail(b.email),username=normalizeUsername(b.username),display=clean(b.displayName,24),password=String(b.password||"");
    if(!/^\S+@\S+\.\S+$/.test(email)||username.length<3||display.length<2||password.length<10)return json({error:"Invalid registration details"},400);

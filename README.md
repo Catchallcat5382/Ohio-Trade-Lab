@@ -1,18 +1,19 @@
-# Ohio Trade Lab V39
+# Ohio Trade Lab V40
 
-This package fixes the broken Online Hub auction-search event handler and adds a dependency-free Cloudflare Pages build.
-
-## Cloudflare Pages settings
-
-- Framework preset: **None**
-- Build command: **npm run build**
-- Build output directory: **dist**
+## Cloudflare Pages build
+- Build command: `npm run build`
+- Output directory: `dist`
 - Root directory: leave blank
 
-The public site and browser-local saving work without backend credentials.
+The Online Hub now contains its full sign-in UI and working controls. Email accounts work through the included `/api` Pages Function when D1 is bound. Google and Discord require OAuth credentials.
 
-## Shared online accounts and saving
+## Required Cloudflare bindings
+1. Create a D1 database and bind it as `DB` to the Pages project.
+2. Run `worker/migrations/0001_init.sql`, then `0002_secure_accounts_auctions.sql`.
+3. Add secret `SESSION_SECRET`.
+4. For Discord, add `DISCORD_CLIENT_ID`, secret `DISCORD_CLIENT_SECRET`, `DISCORD_REDIRECT_URI`, and `PUBLIC_SITE_URL`.
+5. For Google, add `GOOGLE_CLIENT_ID` and put the same public client ID in `config.js`.
 
-The `worker` folder is an optional backend source template. It requires your own Cloudflare D1 database ID, session secret, and Google OAuth client ID. Those private deployment values cannot safely be prefilled into a public ZIP.
+Never put Discord client secrets, session secrets, or administrator credentials in `config.js` or HTML.
 
-Do not deploy `worker/wrangler.example.toml` without copying it to `worker/wrangler.toml` and replacing its documented values.
+Developer Mode is authorized by the database role, not by hidden HTML. Set only your account's `role` to `developer` using the example migration after replacing its email placeholder.

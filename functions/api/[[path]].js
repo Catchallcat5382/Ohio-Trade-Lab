@@ -1,0 +1,4 @@
+import worker from '../../worker/src.js';
+export async function onRequest(context) {
+  return worker.fetch(context.request, context.env);
+}
