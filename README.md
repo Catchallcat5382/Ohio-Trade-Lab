@@ -1,12 +1,13 @@
-# Ohio Trade Lab V23
+# Ohio Trade Lab
 
-This build fixes the database organization and skin images.
+Ohio Trade Lab is a community value reference and trade calculator for Roblox Ohio.
 
-- 955 total entries
-- 893 weapon skins
-- 3 gems
-- 59 other items
-- 189 entries matched to official supplied images
-- 315 legacy rows recovered from V19
+## Features
 
-Upload the full contents of this folder to the repository. Run `push.bat` after replacing files.
+- Trade value and demand comparison
+- Weapon skin, gem, and item browsing
+- Search, category, rarity, weapon, value, and demand filters
+- Image placeholders when confirmed artwork is unavailable
+- Responsive desktop and mobile layout
+
+Values may change over time. Check the listed community references for additional context.
