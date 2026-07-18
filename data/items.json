@@ -9,7 +9,8 @@
   },
   "images": {
     "officialImagesFound": 201,
-    "matchedToRows": 189
+    "matchedToRows": 191,
+    "source": "Images recovered from the supplied rendered value-list HTML."
   },
   "items": [
     {
@@ -16541,7 +16542,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Items",
-      "imageUrl": ""
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/844c53e63_Screenshot2026-03-25at52354PM.png"
     },
     {
       "id": "item-601",
@@ -16557,7 +16558,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Items",
-      "imageUrl": ""
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1925f3005_Screenshot2026-03-25at52349PM.png"
     },
     {
       "id": "item-178",

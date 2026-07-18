@@ -1,13 +1,12 @@
 # Ohio Trade Lab
 
-Ohio Trade Lab is a community value reference and trade calculator for Roblox Ohio.
+A browser-based Roblox Ohio value database, trade calculator, and personal inventory tracker.
 
 ## Features
+- Skin, gem, and item value browsing
+- Trade comparison and match suggestions
+- Personal inventory with quantity controls and total estimated value
+- Inventory JSON import/export
+- Local browser saving
 
-- Trade value and demand comparison
-- Weapon skin, gem, and item browsing
-- Search, category, rarity, weapon, value, and demand filters
-- Image placeholders when confirmed artwork is unavailable
-- Responsive desktop and mobile layout
-
-Values may change over time. Check the listed community references for additional context.
+Open `index.html` locally or publish the folder with any static-site host.
