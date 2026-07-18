@@ -1,58 +1,56 @@
-const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","access-control-allow-origin":"*","access-control-allow-headers":"content-type,x-otl-user","access-control-allow-methods":"GET,POST,DELETE,OPTIONS"}});
+const enc = new TextEncoder();
+const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","access-control-allow-origin":"*","access-control-allow-headers":"content-type,authorization,x-admin-key","access-control-allow-methods":"GET,POST,DELETE,OPTIONS"}});
 const uid=()=>crypto.randomUUID();
 const clean=(v,n=500)=>String(v??"").replace(/[<>]/g,"").trim().slice(0,n);
-const bad=["discord.gg/","bit.ly/","tinyurl","password","cookie","token","login code","verification code"];
-const blocked=t=>bad.some(x=>String(t).toLowerCase().includes(x));
-const user=req=>clean(req.headers.get("x-otl-user")||"",24);
+const normalizeEmail=v=>clean(v,254).toLowerCase();
+const normalizeUsername=v=>clean(v,20).toLowerCase().replace(/[^a-z0-9_]/g,"");
+const bad=[/discord\.gg/i,/bit\.ly/i,/tinyurl/i,/password/i,/passcode/i,/login\s*code/i,/verification\s*code/i,/cookie/i,/credit\s*card/i,/cashapp/i,/venmo/i,/paypal/i,/home\s*address/i,/phone\s*number/i,/dox/i,/kill\s*yourself/i];
+const blocked=t=>bad.some(r=>r.test(String(t)));
+const b64u=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)),c=>c.charCodeAt(0));
+async function hmac(secret,text){const key=await crypto.subtle.importKey("raw",enc.encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);return new Uint8Array(await crypto.subtle.sign("HMAC",key,enc.encode(text)))}
+async function tokenFor(env,user){const payload=b64u(enc.encode(JSON.stringify({sub:user.id,exp:Date.now()+30*864e5})));return payload+"."+b64u(await hmac(env.SESSION_SECRET,payload))}
+async function auth(req,env){const raw=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");if(!raw)return null;const [p,s]=raw.split(".");if(!p||!s)return null;const expected=await hmac(env.SESSION_SECRET,p);const got=unb64u(s);if(expected.length!==got.length)return null;let ok=true;for(let i=0;i<got.length;i++)ok&&=expected[i]===got[i];if(!ok)return null;let data;try{data=JSON.parse(new TextDecoder().decode(unb64u(p)))}catch{return null}if(data.exp<Date.now())return null;return env.DB.prepare("SELECT id,email,username,display_name,avatar,role,status FROM users WHERE id=? AND status='active'").bind(data.sub).first()}
+async function hashPassword(password,salt){const base=await crypto.subtle.importKey("raw",enc.encode(password),"PBKDF2",false,["deriveBits"]);const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:enc.encode(salt),iterations:210000},base,256);return b64u(new Uint8Array(bits))}
+const publicUser=u=>({id:u.id,username:u.username,displayName:u.display_name,avatar:u.avatar||"",role:u.role});
+async function finalizeAuctions(env){const now=Date.now();const {results}=await env.DB.prepare("SELECT * FROM listings WHERE type='auction' AND status='open' AND expires<=? LIMIT 100").bind(now).all();for(const row of results){const bid=await env.DB.prepare("SELECT * FROM bids WHERE listing_id=? ORDER BY value DESC,created ASC LIMIT 1").bind(row.id).first();if(!bid){await env.DB.prepare("UPDATE listings SET status='ended_no_bids' WHERE id=? AND status='open'").bind(row.id).run();continue}const room=uid(),created=Date.now();await env.DB.batch([env.DB.prepare("UPDATE listings SET status='delivery_pending',winning_bid_id=? WHERE id=? AND status='open'").bind(bid.id,row.id),env.DB.prepare("INSERT INTO rooms(id,listing_id,title,member_a,member_b,created,status) VALUES(?,?,?,?,?,?,?)").bind(room,row.id,row.title,row.owner_id,bid.bidder_id,created,"open"),env.DB.prepare("INSERT INTO messages(id,room_id,author_id,body,created,system) VALUES(?,?,?,?,?,1)").bind(uid(),room,row.owner_id,"Auction ended. The highest bidder and owner must complete the in-game trade. The owner must confirm delivery before the auction closes.",created),env.DB.prepare("INSERT INTO notifications(id,recipient_id,body,room_id,created) VALUES(?,?,?,?,?)").bind(uid(),row.owner_id,"Your auction ended with a winning skin bid. Delivery confirmation is required.",room,created),env.DB.prepare("INSERT INTO notifications(id,recipient_id,body,room_id,created) VALUES(?,?,?,?,?)").bind(uid(),bid.bidder_id,"You won an auction. Open the private room to complete the in-game trade.",room,created)]);}}
 export default {async fetch(req,env){
-  if(req.method==="OPTIONS")return json({ok:true});
-  const u=new URL(req.url),path=u.pathname.replace(/^\/api/,"");
-  if(path==="/health")return json({ok:true});
-  const who=user(req); if(!who)return json({error:"Missing display name"},400);
-  try{
-    if(path==="/listings"&&req.method==="GET"){
-      const now=Date.now();
-      const {results}=await env.DB.prepare("SELECT * FROM listings WHERE status='open' AND expires>? ORDER BY created DESC LIMIT 200").bind(now).all();
-      for(const x of results){x.give=JSON.parse(x.give_json);x.want=JSON.parse(x.want_json);delete x.give_json;delete x.want_json;if(x.type==='auction'){const b=await env.DB.prepare("SELECT bidder,items_json,value,created FROM bids WHERE listing_id=? ORDER BY value DESC,created ASC LIMIT 50").bind(x.id).all();x.bids=b.results.map(v=>({...v,items:JSON.parse(v.items_json)}))}}
-      return json({listings:results});
-    }
-    if(path==="/listings"&&req.method==="POST"){
-      const b=await req.json(),id=uid(),type=b.type==='auction'?'auction':'trade',title=clean(b.title,70),description=clean(b.description,500),give=Array.isArray(b.give)?b.give.slice(0,8):[],want=Array.isArray(b.want)?b.want.slice(0,8):[],created=Date.now(),expires=Math.min(created+7*864e5,Number(b.expires)||created+864e5);
-      if(!title||!give.length||blocked(title+' '+description))return json({error:"Invalid or blocked listing"},400);
-      await env.DB.prepare("INSERT INTO listings(id,type,owner,title,description,give_json,want_json,created,expires) VALUES(?,?,?,?,?,?,?,?,?)").bind(id,type,who,title,description,JSON.stringify(give),JSON.stringify(want),created,expires).run();
-      return json({ok:true,id});
-    }
-    const lm=path.match(/^\/listings\/([^/]+)$/);
-    if(lm&&req.method==="DELETE"){
-      await env.DB.prepare("UPDATE listings SET status='removed' WHERE id=? AND owner=?").bind(lm[1],who).run();return json({ok:true});
-    }
-    const am=path.match(/^\/listings\/([^/]+)\/accept$/);
-    if(am&&req.method==="POST"){
-      const row=await env.DB.prepare("SELECT * FROM listings WHERE id=? AND status='open'").bind(am[1]).first();if(!row)return json({error:"Listing unavailable"},404);if(row.owner===who)return json({error:"Cannot accept your own listing"},400);
-      const room=uid(),created=Date.now();await env.DB.batch([
-        env.DB.prepare("UPDATE listings SET status='accepted' WHERE id=?").bind(row.id),
-        env.DB.prepare("INSERT INTO rooms(id,listing_id,title,members_json,created) VALUES(?,?,?,?,?)").bind(room,row.id,row.title,JSON.stringify([row.owner,who]),created),
-        env.DB.prepare("INSERT INTO messages(id,room_id,author,body,created) VALUES(?,?,?,?,?)").bind(uid(),room,"Ohio Trade Lab","Trade accepted. Coordinate the in-game trade here. Never share passwords or login codes.",created),
-        env.DB.prepare("INSERT INTO notifications(id,recipient,body,room_id,created) VALUES(?,?,?,?,?)").bind(uid(),row.owner,`${who} accepted your trade: ${row.title}`,room,created)
-      ]);return json({ok:true,room});
-    }
-    const bm=path.match(/^\/listings\/([^/]+)\/bid$/);
-    if(bm&&req.method==="POST"){
-      const b=await req.json(),items=Array.isArray(b.items)?b.items.slice(0,8):[];if(!items.length)return json({error:"Bid needs items"},400);
-      const row=await env.DB.prepare("SELECT * FROM listings WHERE id=? AND type='auction' AND status='open' AND expires>?").bind(bm[1],Date.now()).first();if(!row)return json({error:"Auction unavailable"},404);
-      await env.DB.prepare("INSERT INTO bids(id,listing_id,bidder,items_json,value,created) VALUES(?,?,?,?,?,?)").bind(uid(),row.id,who,JSON.stringify(items),Number(b.value)||0,Date.now()).run();return json({ok:true});
-    }
-    if(path==="/notifications"&&req.method==="GET"){
-      const {results}=await env.DB.prepare("SELECT * FROM notifications WHERE recipient=? ORDER BY created DESC LIMIT 100").bind(who).all();return json({notifications:results});
-    }
-    const rm=path.match(/^\/rooms\/([^/]+)$/);
-    if(rm&&req.method==="GET"){
-      const room=await env.DB.prepare("SELECT * FROM rooms WHERE id=?").bind(rm[1]).first();if(!room)return json({error:"Room missing"},404);const members=JSON.parse(room.members_json);if(!members.includes(who))return json({error:"Private room"},403);const {results}=await env.DB.prepare("SELECT author,body,created FROM messages WHERE room_id=? ORDER BY created ASC LIMIT 500").bind(room.id).all();return json({room:{...room,members,messages:results}});
-    }
-    const mm=path.match(/^\/rooms\/([^/]+)\/messages$/);
-    if(mm&&req.method==="POST"){
-      const room=await env.DB.prepare("SELECT * FROM rooms WHERE id=?").bind(mm[1]).first();if(!room)return json({error:"Room missing"},404);if(!JSON.parse(room.members_json).includes(who))return json({error:"Private room"},403);const b=await req.json(),body=clean(b.body,300);if(!body||blocked(body))return json({error:"Message blocked"},400);await env.DB.prepare("INSERT INTO messages(id,room_id,author,body,created) VALUES(?,?,?,?,?)").bind(uid(),room.id,who,body,Date.now()).run();return json({ok:true});
-    }
-    return json({error:"Not found"},404);
-  }catch(e){return json({error:"Server error",detail:String(e?.message||e)},500)}
+ if(req.method==="OPTIONS")return json({ok:true});
+ const url=new URL(req.url),path=url.pathname.replace(/^\/api/,"");
+ if(path==="/health")return json({ok:true});
+ try{
+  if(path==="/auth/register"&&req.method==="POST"){
+   const b=await req.json(),email=normalizeEmail(b.email),username=normalizeUsername(b.username),display=clean(b.displayName,24),password=String(b.password||"");
+   if(!/^\S+@\S+\.\S+$/.test(email)||username.length<3||display.length<2||password.length<10)return json({error:"Invalid registration details"},400);
+   const exists=await env.DB.prepare("SELECT id FROM users WHERE email=? OR username=?").bind(email,username).first();if(exists)return json({error:"Email or username already registered"},409);
+   const id=uid(),salt=uid(),hash=await hashPassword(password,salt),created=Date.now();await env.DB.prepare("INSERT INTO users(id,email,username,display_name,password_hash,password_salt,provider,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,email,username,display,hash,salt,"email",created).run();const u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first();return json({token:await tokenFor(env,u),user:publicUser(u)});
+  }
+  if(path==="/auth/login"&&req.method==="POST"){
+   const b=await req.json(),email=normalizeEmail(b.email),password=String(b.password||""),u=await env.DB.prepare("SELECT * FROM users WHERE email=? AND provider='email'").bind(email).first();if(!u||u.status!=="active")return json({error:"Incorrect email or password"},401);const hash=await hashPassword(password,u.password_salt);if(hash!==u.password_hash)return json({error:"Incorrect email or password"},401);return json({token:await tokenFor(env,u),user:publicUser(u)});
+  }
+  if(path==="/auth/google"&&req.method==="POST"){
+   const b=await req.json();if(!b.credential||!env.GOOGLE_CLIENT_ID)return json({error:"Google login is not configured"},400);const vr=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(b.credential));const g=await vr.json();if(!vr.ok||g.aud!==env.GOOGLE_CLIENT_ID||g.email_verified!=="true")return json({error:"Google sign-in verification failed"},401);let u=await env.DB.prepare("SELECT * FROM users WHERE provider_id=? AND provider='google'").bind(g.sub).first();if(!u){let username=normalizeUsername((g.email||"user").split("@")[0]);if(username.length<3)username="user_"+g.sub.slice(-6);while(await env.DB.prepare("SELECT id FROM users WHERE username=?").bind(username).first())username=username.slice(0,15)+Math.floor(Math.random()*9999);const id=uid();await env.DB.prepare("INSERT INTO users(id,email,username,display_name,avatar,provider,provider_id,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,normalizeEmail(g.email),username,clean(g.name||username,24),clean(g.picture,500),"google",g.sub,Date.now()).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first()}return json({token:await tokenFor(env,u),user:publicUser(u)});
+  }
+  const me=await auth(req,env);if(!me)return json({error:"Authentication required"},401);
+  if(path==="/auth/me")return json({user:publicUser(me)});
+  if(path==="/auth/profile"&&req.method==="POST"){const b=await req.json(),display=clean(b.displayName,24);if(display.length<2||blocked(display))return json({error:"Invalid display name"},400);await env.DB.prepare("UPDATE users SET display_name=? WHERE id=?").bind(display,me.id).run();const u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(me.id).first();return json({user:publicUser(u)});}
+  await finalizeAuctions(env);
+  if(path==="/listings"&&req.method==="GET"){
+   const {results}=await env.DB.prepare("SELECT l.*,u.username owner_username,u.display_name owner_display FROM listings l JOIN users u ON u.id=l.owner_id WHERE l.status IN ('open','delivery_pending','ended_no_bids') ORDER BY l.created DESC LIMIT 300").all();for(const x of results){x.give=JSON.parse(x.give_json);x.want=JSON.parse(x.want_json);x.mine=x.owner_id===me.id;delete x.give_json;delete x.want_json;if(x.type==='auction'){const b=await env.DB.prepare("SELECT b.id,b.bidder_id,u.username bidder_username,u.display_name bidder_display,b.items_json,b.value,b.created FROM bids b JOIN users u ON u.id=b.bidder_id WHERE b.listing_id=? ORDER BY b.value DESC,b.created ASC LIMIT 100").bind(x.id).all();x.bids=b.results.map(v=>({...v,items:JSON.parse(v.items_json)}))}}return json({listings:results});
+  }
+  if(path==="/listings"&&req.method==="POST"){
+   const b=await req.json(),type=b.type==='auction'?'auction':'trade',title=clean(b.title,70),description=clean(b.description,500),give=Array.isArray(b.give)?b.give.slice(0,8):[],want=Array.isArray(b.want)?b.want.slice(0,8):[];if(!title||!give.length||blocked(title+' '+description))return json({error:"Invalid or blocked listing"},400);const created=Date.now(),expires=Math.min(created+7*864e5,Math.max(created+36e5,Number(b.expires)||created+864e5)),id=uid();await env.DB.prepare("INSERT INTO listings(id,type,owner_id,title,description,give_json,want_json,category,preferred_section,preferred_set,min_bid_value,created,expires,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,type,me.id,title,description,JSON.stringify(give),JSON.stringify(want),clean(b.category,20),clean(b.preferredSection,40),clean(b.preferredSet,40),Number(b.minBidValue)||0,created,expires,"open").run();return json({ok:true,id});
+  }
+  let m=path.match(/^\/listings\/([^/]+)$/);if(m&&req.method==="DELETE"){await env.DB.prepare("UPDATE listings SET status='removed' WHERE id=? AND owner_id=?").bind(m[1],me.id).run();return json({ok:true});}
+  m=path.match(/^\/listings\/([^/]+)\/accept$/);if(m&&req.method==="POST"){const row=await env.DB.prepare("SELECT * FROM listings WHERE id=? AND type='trade' AND status='open' AND expires>?").bind(m[1],Date.now()).first();if(!row)return json({error:"Trade unavailable"},404);if(row.owner_id===me.id)return json({error:"Cannot accept your own trade"},400);const room=uid(),created=Date.now();await env.DB.batch([env.DB.prepare("UPDATE listings SET status='accepted' WHERE id=? AND status='open'").bind(row.id),env.DB.prepare("INSERT INTO rooms(id,listing_id,title,member_a,member_b,created,status) VALUES(?,?,?,?,?,?,?)").bind(room,row.id,row.title,row.owner_id,me.id,created,"open"),env.DB.prepare("INSERT INTO notifications(id,recipient_id,body,room_id,created) VALUES(?,?,?,?,?)").bind(uid(),row.owner_id,`${me.display_name} accepted your trade.`,room,created)]);return json({ok:true,room});}
+  m=path.match(/^\/listings\/([^/]+)\/bid$/);if(m&&req.method==="POST"){const b=await req.json(),items=Array.isArray(b.items)?b.items.slice(0,8):[],value=Number(b.value)||0,row=await env.DB.prepare("SELECT * FROM listings WHERE id=? AND type='auction' AND status='open' AND expires>?").bind(m[1],Date.now()).first();if(!row)return json({error:"Auction unavailable"},404);if(row.owner_id===me.id)return json({error:"Cannot bid on your own auction"},400);if(!items.length||value<row.min_bid_value)return json({error:"Bid does not meet requirements"},400);await env.DB.prepare("INSERT INTO bids(id,listing_id,bidder_id,items_json,value,created) VALUES(?,?,?,?,?,?)").bind(uid(),row.id,me.id,JSON.stringify(items),value,Date.now()).run();return json({ok:true});}
+  m=path.match(/^\/listings\/([^/]+)\/confirm-delivery$/);if(m&&req.method==="POST"){const row=await env.DB.prepare("SELECT * FROM listings WHERE id=? AND owner_id=? AND status='delivery_pending'").bind(m[1],me.id).first();if(!row)return json({error:"Pending auction not found"},404);await env.DB.prepare("UPDATE listings SET status='completed',completed=? WHERE id=?").bind(Date.now(),row.id).run();await env.DB.prepare("UPDATE rooms SET status='closed' WHERE listing_id=?").bind(row.id).run();return json({ok:true});}
+  m=path.match(/^\/listings\/([^/]+)\/rerun$/);if(m&&req.method==="POST"){const row=await env.DB.prepare("SELECT * FROM listings WHERE id=? AND owner_id=? AND status='delivery_pending'").bind(m[1],me.id).first();if(!row)return json({error:"Pending auction not found"},404);const id=uid(),created=Date.now(),duration=Math.max(36e5,row.expires-row.created);await env.DB.batch([env.DB.prepare("UPDATE listings SET status='delivery_failed' WHERE id=?").bind(row.id),env.DB.prepare("INSERT INTO listings(id,type,owner_id,title,description,give_json,want_json,category,preferred_section,preferred_set,min_bid_value,created,expires,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)").bind(id,'auction',me.id,row.title,row.description,row.give_json,row.want_json,row.category,row.preferred_section,row.preferred_set,row.min_bid_value,created,created+duration,'open')]);return json({ok:true,id});}
+  if(path==="/notifications"&&req.method==="GET"){const {results}=await env.DB.prepare("SELECT id,body,room_id roomId,created,read FROM notifications WHERE recipient_id=? ORDER BY created DESC LIMIT 100").bind(me.id).all();return json({notifications:results});}
+  if(path==="/notifications/read"&&req.method==="POST"){await env.DB.prepare("UPDATE notifications SET read=1 WHERE recipient_id=?").bind(me.id).run();return json({ok:true});}
+  m=path.match(/^\/rooms\/([^/]+)$/);if(m&&req.method==="GET"){const room=await env.DB.prepare("SELECT * FROM rooms WHERE id=? AND (member_a=? OR member_b=?)").bind(m[1],me.id,me.id).first();if(!room)return json({error:"Private room"},403);const members=await env.DB.prepare("SELECT id,username,display_name FROM users WHERE id IN (?,?)").bind(room.member_a,room.member_b).all();const msgs=await env.DB.prepare("SELECT m.author_id,u.display_name authorDisplay,m.body,m.created,m.system FROM messages m JOIN users u ON u.id=m.author_id WHERE room_id=? ORDER BY m.created ASC LIMIT 500").bind(room.id).all();return json({room:{id:room.id,title:room.title,status:room.status,membersDisplay:members.results.map(x=>x.display_name),messages:msgs.results}});}
+  m=path.match(/^\/rooms\/([^/]+)\/messages$/);if(m&&req.method==="POST"){const room=await env.DB.prepare("SELECT * FROM rooms WHERE id=? AND status='open' AND (member_a=? OR member_b=?)").bind(m[1],me.id,me.id).first();if(!room)return json({error:"Private room unavailable"},403);const b=await req.json(),body=clean(b.body,300);if(!body||blocked(body))return json({error:"Message blocked by safety filter"},400);await env.DB.prepare("INSERT INTO messages(id,room_id,author_id,body,created,system) VALUES(?,?,?,?,?,0)").bind(uid(),room.id,me.id,body,Date.now()).run();return json({ok:true});}
+  if(path==="/admin/users"&&req.method==="GET"){if(req.headers.get("x-admin-key")!==env.ADMIN_KEY)return json({error:"Forbidden"},403);const {results}=await env.DB.prepare("SELECT id,email,username,display_name,provider,created,status FROM users ORDER BY created DESC LIMIT 500").all();return json({users:results});}
+  return json({error:"Not found"},404);
+ }catch(e){return json({error:"Server error",detail:String(e?.message||e)},500)}
 }};
