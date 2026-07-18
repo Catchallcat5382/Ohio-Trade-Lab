@@ -174,6 +174,7 @@ input:focus,select:focus{border-color:#824fc0}
   <button class="navBtn" data-page="items"><span class="ico">❉</span>ITEMS</button>
   <button class="navBtn" data-page="categories"><span class="ico">▦</span>CATEGORIES</button>
   <button class="navBtn" data-page="inventory"><span class="ico">▤</span>INVENTORY</button>
+  <button class="navBtn" data-page="online"><span class="ico">◎</span>ONLINE HUB</button>
   <button class="navBtn" data-page="database"><span class="ico">▣</span>DATABASE</button>
   <button class="navBtn" data-page="sources"><span class="ico">▤</span>WIKIS</button>
   <button class="navBtn" data-page="summary"><span class="ico">⌘</span>SET SUMMARY</button>
@@ -194,6 +195,7 @@ input:focus,select:focus{border-color:#824fc0}
   <button class="tab" data-page="items">❉ ITEMS</button>
   <button class="tab" data-page="categories">▦ CATEGORIES</button>
   <button class="tab" data-page="inventory">▤ INVENTORY</button>
+  <button class="tab" data-page="online">◎ ONLINE TRADES</button>
   <button class="tab" data-page="database">▣ DATABASE</button>
   <button class="tab" data-page="sources">▤ SOURCES & WIKIS</button>
   <button class="tab" data-page="summary">⌘ SET SUMMARY</button>
@@ -227,8 +229,13 @@ input:focus,select:focus{border-color:#824fc0}
         </select>
         <select id="matchCount">
           <option value="1">Up to 1 item</option>
-          <option value="2" selected>Up to 2 items</option>
+          <option value="2">Up to 2 items</option>
           <option value="3">Up to 3 items</option>
+          <option value="4" selected>Up to 4 items</option>
+          <option value="5">Up to 5 items</option>
+          <option value="6">Up to 6 items</option>
+          <option value="7">Up to 7 items</option>
+          <option value="8">Up to 8 items</option>
         </select>
         <button id="findMatchesBtn" type="button">FIND MATCHES</button>
       </div>
@@ -262,7 +269,17 @@ input:focus,select:focus{border-color:#824fc0}
   <div class="toolbar"><input id="inventorySearch" placeholder="Search your inventory..."><select id="inventorySort"><option value="value">Highest total value</option><option value="name">Name A–Z</option><option value="quantity">Highest quantity</option></select></div>
   <div id="inventoryRows" class="inventoryRows"></div>
  </div></section>
- <section id="database" class="page"><div class="panel"><div class="toolbar"><input id="allSearch" placeholder="Search everything..."><select id="allSet"></select><select id="allRarity"></select><select id="allWeapon"></select><select id="allSource"></select></div><div id="allCards" class="cardsAll"></div></div></section>
+ <section id="online" class="page"><div class="panel onlinePanel">
+  <div class="onlineHero"><div><h2>ONLINE TRADE HUB</h2><p>Post offers, accept public listings, run item-for-item auctions, and use a private trade room after both traders agree.</p></div><div class="onlineIdentity"><label>Display name<input id="onlineName" maxlength="24" placeholder="Your Roblox/display name"></label><button id="saveOnlineName" class="topBtn">SAVE NAME</button><button id="notifyBtn" class="topBtn">ENABLE NOTIFICATIONS</button></div></div>
+  <div class="onlineModeNote" id="onlineModeNote">Online mode connects to <code>/api</code> when the included Cloudflare Worker is deployed. Until then, this page uses local demo storage in this browser.</div>
+  <div class="onlineTabs"><button class="onlineTab active" data-online-view="market">TRADE MARKET</button><button class="onlineTab" data-online-view="create">POST TRADE</button><button class="onlineTab" data-online-view="auction">AUCTIONS</button><button class="onlineTab" data-online-view="inbox">INBOX & ROOMS</button></div>
+  <div id="onlineMarket" class="onlineView active"><div class="toolbar"><input id="marketSearch" placeholder="Search listings, items, names, or descriptions..."><select id="marketType"><option value="">All listings</option><option value="trade">Trades</option><option value="auction">Auctions</option></select><button id="refreshMarket" class="topBtn">REFRESH</button></div><div id="marketCards" class="marketCards"></div></div>
+  <div id="onlineCreate" class="onlineView"><div class="onlineFormGrid"><div class="onlineFormCard"><h3>POST CURRENT TRADE</h3><p>Your current calculator offers will be copied into the listing.</p><label>Title<input id="listingTitle" maxlength="70" placeholder="Trading Void M4A1 for fair offers"></label><label>Description<textarea id="listingDescription" maxlength="500" placeholder="Mention preferred guns, sets, quantities, or other useful details."></textarea></label><label>Expires<select id="listingExpiry"><option value="1">1 hour</option><option value="6">6 hours</option><option value="24" selected>24 hours</option><option value="72">3 days</option><option value="168">7 days</option></select></label><button id="postTradeBtn" class="onlinePrimary">POST TRADE</button></div><div class="onlinePreview"><h3>LISTING PREVIEW</h3><div class="offerPreview"><h4>YOU GIVE</h4><div id="postGivePreview" class="slotGrid"></div></div><div class="offerPreview"><h4>YOU WANT</h4><div id="postWantPreview" class="slotGrid"></div></div></div></div></div>
+  <div id="onlineAuction" class="onlineView"><div class="onlineFormGrid"><div class="onlineFormCard"><h3>CREATE ITEM-FOR-ITEM AUCTION</h3><label>Auction item<select id="auctionItem"></select></label><label>Title<input id="auctionTitle" maxlength="70" placeholder="Auctioning Void Saiga 12"></label><label>Description<textarea id="auctionDescription" maxlength="500" placeholder="Explain what kinds of item offers you are looking for."></textarea></label><label>Duration<select id="auctionDuration"><option value="1">1 hour</option><option value="6">6 hours</option><option value="24" selected>24 hours</option><option value="72">3 days</option></select></label><button id="postAuctionBtn" class="onlinePrimary">START AUCTION</button></div><div class="onlineFormCard"><h3>HOW BIDDING WORKS</h3><p>Bids are item offers—not real money. Pick up to eight items from your inventory or database. When time expires, the auction owner can select the best offer and open a private room with that bidder.</p><div class="filterNotice">Chat filters block common slurs, unsafe links, spam, and requests for passwords or private account information. Roblox/display names and item names are allowed.</div></div></div></div>
+  <div id="onlineInbox" class="onlineView"><div class="inboxLayout"><div><h3>NOTIFICATIONS</h3><div id="onlineInboxList" class="inboxList"></div></div><div><h3>PRIVATE TRADE ROOM</h3><div id="tradeRoom" class="tradeRoom"><div class="roomEmpty">Accept a trade or winning bid to open a private room.</div></div></div></div></div>
+ </div></section>
+
+<section id="database" class="page"><div class="panel"><div class="toolbar"><input id="allSearch" placeholder="Search everything..."><select id="allSet"></select><select id="allRarity"></select><select id="allWeapon"></select><select id="allSource"></select></div><div id="allCards" class="cardsAll"></div></div></section>
  <section id="sources" class="page"><div class="panel sources">
   <div class="source"><h3>Google Sheets Database</h3><p>Primary editable value database.</p><a class="topBtn sheet" target="_blank" href="https://docs.google.com/spreadsheets/d/1qrIQTyq4mcHQqUHgMrTaz-Lnt5QmHM2G/edit?usp=sharing">OPEN DATABASE</a></div>
   <div class="source"><h3>Ohio Values & Demand</h3><p>Community skin-value reference.</p><a class="topBtn" target="_blank" href="https://ohio-skin-prices.fandom.com/wiki/Ohio_Values_%26_Demand">OPEN WIKI</a></div>
@@ -503,6 +520,11 @@ function tradeDemand(side){
 function add(side,id){
  const item=items.find(x=>String(x.id)===String(id));
  if(!item)return;
+ if(!Array.isArray(trade[side]))trade[side]=[];
+ if(trade[side].length>=8){
+   const status=$("#status");if(status)status.textContent="Each offer can contain a maximum of 8 slots (4 top, 4 bottom), just like the game.";
+   return;
+ }
  trade[side].push(item);
  save();
  renderTrade();
@@ -541,8 +563,8 @@ function renderTrade(){
  const theirDemand=tradeDemand("theirs");
  const difference=theirValue-yourValue;
  const demandDifference=theirDemand-yourDemand;
- if($("#yourMeta"))$("#yourMeta").innerHTML=`Total Value: <b>${money(yourValue)}</b> &nbsp; • &nbsp; Demand: <b>${yourDemand.toFixed(1).replace(".0","")}/10</b>`;
- if($("#theirMeta"))$("#theirMeta").innerHTML=`Total Value: <b>${money(theirValue)}</b> &nbsp; • &nbsp; Demand: <b>${theirDemand.toFixed(1).replace(".0","")}/10</b>`;
+ if($("#yourMeta"))$("#yourMeta").innerHTML=`Slots: <b>${trade.yours.length}/8</b> &nbsp; • &nbsp; Total Value: <b>${money(yourValue)}</b> &nbsp; • &nbsp; Demand: <b>${yourDemand.toFixed(1).replace(".0","")}/10</b>`;
+ if($("#theirMeta"))$("#theirMeta").innerHTML=`Slots: <b>${trade.theirs.length}/8</b> &nbsp; • &nbsp; Total Value: <b>${money(theirValue)}</b> &nbsp; • &nbsp; Demand: <b>${theirDemand.toFixed(1).replace(".0","")}/10</b>`;
  if($("#difference"))$("#difference").textContent=(difference>0?"+":"")+money(difference);
  if($("#demandDifference"))$("#demandDifference").textContent=(demandDifference>0?"+":"")+demandDifference.toFixed(1).replace(".0","")+"/10";
  let verdict="FAIR",verdictClass="fair";
@@ -667,7 +689,7 @@ function findBestMatches(){
    return;
  }
  const mode=$("#matchMode").value;
- const maxCount=Math.max(1,Math.min(3,Number($("#matchCount").value)||2));
+ const maxCount=Math.max(1,Math.min(8,Number($("#matchCount").value)||4));
  const existingFillIds=new Set((trade[sides.fill]||[]).map(x=>String(x.id)));
  let pool=items.filter(x=>!existingFillIds.has(String(x.id))&&Number(x.value)>0);
  pool=pool.sort((a,b)=>Math.abs(a.value-target)-Math.abs(b.value-target)).slice(0,150);
@@ -679,11 +701,22 @@ function findBestMatches(){
    const score=candidateScore(combo,target,targetDemand,mode);
    if(Number.isFinite(score))results.push({combo,score,value:totalOf(combo),demand:demandOf(combo)});
  };
- for(let i=0;i<pool.length;i++)push([pool[i]]);
- if(maxCount>=2){for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++)push([pool[i],pool[j]])}
- if(maxCount>=3){
-   const small=pool.slice(0,55);
-   for(let i=0;i<small.length;i++)for(let j=i+1;j<small.length;j++)for(let k=j+1;k<small.length;k++)push([small[i],small[j],small[k]]);
+ // Beam search keeps matching responsive while supporting the game maximum of eight slots.
+ let beam=[[]];
+ const beamWidth=260;
+ for(let depth=1;depth<=maxCount;depth++){
+   const next=[];
+   for(const combo of beam){
+     const startIndex=combo.length?pool.indexOf(combo[combo.length-1])+1:0;
+     for(let i=startIndex;i<pool.length;i++){
+       const candidate=combo.concat(pool[i]);
+       push(candidate);
+       next.push(candidate);
+     }
+   }
+   next.sort((a,b)=>candidateScore(a,target,targetDemand,mode)-candidateScore(b,target,targetDemand,mode));
+   beam=next.slice(0,beamWidth);
+   if(!beam.length)break;
  }
  results.sort((a,b)=>a.score-b.score||Math.abs(a.value-target)-Math.abs(b.value-target));
  const best=results.slice(0,8);
@@ -694,7 +727,7 @@ function findBestMatches(){
    const label=diff===0?"Exact match":diff>0?`${money(diff)} over`:`${money(Math.abs(diff))} under`;
    return `<div class="matchResult">
     <div class="matchRank">#${index+1}</div>
-    <div class="matchNames"><small>For ${fillLabel} · matching ${targetLabel}</small>${r.combo.map(x=>`<span>${esc(x.name)}</span>`).join("")}</div>
+    <div class="matchNames"><small>For ${fillLabel} · matching ${targetLabel}</small><div class="matchVisualGrid">${r.combo.map(x=>`<div class="matchVisualTile ${rarityClass(x.rarity)}"><div class="matchVisualArt">${artImg(x)}</div><span title="${esc(x.name)}">${esc(x.name)}</span><b>${money(x.value)}</b></div>`).join("")}</div></div>
     <div class="matchNumbers"><b>${money(r.value)}</b><small>${label} · Demand ${r.demand.toFixed(1).replace(".0","")}</small></div>
     <button onclick='useMatch(${JSON.stringify(r.combo.map(x=>x.id))},${JSON.stringify(sides.fill)})'>USE FOR ${fillLabel.toUpperCase()}</button>
    </div>`
@@ -702,7 +735,7 @@ function findBestMatches(){
 }
 function useMatch(ids,fillSide){
  const side=fillSide==="yours"?"yours":"theirs";
- trade[side]=ids.map(id=>items.find(x=>String(x.id)===String(id))).filter(Boolean);
+ trade[side]=ids.slice(0,8).map(id=>items.find(x=>String(x.id)===String(id))).filter(Boolean);
  save();
  renderTrade();
  $("#status").textContent=`The suggested match was added to ${side==="yours"?"Your Offer":"Their Offer"}.`;
@@ -1113,5 +1146,38 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
 .matchNames small{font-size:8px;color:#71839d;margin-bottom:2px}
 @media(max-width:1000px){.valueWatch{position:static}}
 </style>
+
+<style id="v32-online-and-eight-slots">
+.tradeGrid{grid-template-columns:minmax(390px,1fr) minmax(300px,370px) minmax(390px,1fr)!important;gap:22px!important;align-items:start}.offer{min-height:430px!important}.drop{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(150px,1fr))!important;gap:10px!important;min-height:330px!important;max-height:none!important;overflow:visible!important;padding:12px!important}.tradeTile{min-height:150px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;padding:8px!important}.tradeThumb{width:100%!important;max-width:none!important;height:76px!important;min-height:76px!important}.tradeItemInfo{display:grid!important;text-align:center!important;gap:3px!important}.tradeItemName{font-size:11px!important;white-space:normal!important;line-height:1.15!important}.tradeItemSub{font-size:9px!important}.tradeItemValue{font-size:12px!important}.emptyOffer{grid-column:1/-1;grid-row:1/-1;display:grid;place-items:center}.matchResults{max-height:600px!important}.matchResult{grid-template-columns:28px minmax(0,1fr) auto!important;padding:9px!important}.matchVisualGrid{display:grid;grid-template-columns:repeat(4,minmax(62px,1fr));gap:6px;margin-top:6px}.matchVisualTile{border:1px solid #3b4d69;border-radius:7px;padding:4px;background:#080f1b;min-width:0}.matchVisualTile.legendary{border-color:#d8a928}.matchVisualTile.mythic{border-color:#a759e8}.matchVisualArt{height:48px;overflow:hidden}.matchVisualArt img{width:100%;height:100%;object-fit:contain}.matchVisualTile span{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.matchVisualTile b{display:block;font-size:8px;color:#62c7ff}.onlinePanel{min-height:720px}.onlineHero{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.onlineHero h2{margin:0;color:#eedaff}.onlineHero p{color:#9ba9be;max-width:760px}.onlineIdentity{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.onlineIdentity label,.onlineFormCard label{display:grid;gap:5px;color:#aebbd0;font-size:11px}.onlineIdentity input,.onlineFormCard input,.onlineFormCard textarea,.onlineFormCard select{background:#08111f;border:1px solid #344765;color:#eef4ff;border-radius:8px;padding:10px}.onlineFormCard textarea{min-height:110px;resize:vertical}.onlineModeNote{margin:14px 0;padding:10px 12px;border:1px solid #285278;border-radius:8px;background:#091a2a;color:#a8dfff;font-size:12px}.onlineTabs{display:flex;gap:7px;overflow:auto;margin-bottom:14px}.onlineTab{border:1px solid #344765;background:#0a1220;color:#b9c5d7;border-radius:8px;padding:10px 13px;font-weight:850;white-space:nowrap;cursor:pointer}.onlineTab.active{border-color:#a84bd8;background:#281337;color:#f1d9ff}.onlineView{display:none}.onlineView.active{display:block}.marketCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}.marketCard,.onlineFormCard,.onlinePreview{border:1px solid #30415e;border-radius:11px;background:linear-gradient(145deg,#0e1728,#080d17);padding:14px}.marketCardHead{display:flex;justify-content:space-between;gap:10px}.marketCardHead h3{margin:0;color:#f0ddff}.marketMeta{font-size:10px;color:#91a0b8}.marketOffers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.marketOffers h4,.offerPreview h4{font-size:10px;color:#91a0b8;margin:0 0 6px}.slotGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:84px;gap:5px}.onlineSlot{border:1px solid #354865;border-radius:7px;background:#070d17;padding:4px;min-width:0}.onlineSlot img{width:100%;height:52px;object-fit:contain}.onlineSlot span{display:block;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.onlineActions{display:flex;gap:7px;flex-wrap:wrap}.onlinePrimary,.onlineActions button{border:1px solid #9a43ca;background:linear-gradient(180deg,#7729a6,#4a1768);color:white;border-radius:8px;padding:9px 12px;font-weight:850;cursor:pointer}.onlineFormGrid{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(420px,1.2fr);gap:14px}.onlineFormCard{display:grid;gap:10px}.onlineFormCard h3,.onlinePreview h3{margin:0;color:#ead9f6}.filterNotice{padding:10px;border:1px solid #72551d;background:#251d09;border-radius:8px;color:#f3cf72;font-size:12px}.inboxLayout{display:grid;grid-template-columns:minmax(280px,.7fr) minmax(440px,1.3fr);gap:14px}.inboxList,.tradeRoom{border:1px solid #30415e;border-radius:10px;background:#080e18;min-height:430px;padding:10px}.inboxEntry{padding:10px;border-bottom:1px solid #24334a}.roomHeader{display:flex;justify-content:space-between;gap:10px}.roomMessages{height:300px;overflow:auto;display:grid;align-content:start;gap:7px;padding:10px 0}.roomMessage{max-width:80%;padding:8px 10px;border-radius:9px;background:#172238}.roomMessage.mine{margin-left:auto;background:#3b1d50}.roomComposer{display:grid;grid-template-columns:1fr auto;gap:7px}.roomComposer input{background:#08111f;border:1px solid #344765;color:white;border-radius:8px;padding:10px}.roomEmpty{display:grid;place-items:center;min-height:390px;color:#8c9ab0}@media(max-width:1300px){.tradeGrid{grid-template-columns:1fr!important}.judge{order:3}.drop{min-height:310px!important}.onlineFormGrid,.inboxLayout{grid-template-columns:1fr}}@media(max-width:700px){.drop{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(4,minmax(135px,1fr))!important}.matchVisualGrid{grid-template-columns:repeat(2,minmax(70px,1fr))}.onlineHero{display:grid}.marketOffers{grid-template-columns:1fr}.slotGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script id="v32-online-hub">
+(()=>{
+ const ONLINE_KEY="otlOnlineHubV1",NAME_KEY="otlOnlineNameV1",ROOM_KEY="otlActiveRoomV1";
+ const badWords=["discord.gg/","bit.ly/","tinyurl","password","cookie","token","login code","verification code"];
+ const state=(()=>{try{return JSON.parse(localStorage.getItem(ONLINE_KEY)||'{"listings":[],"inbox":[],"rooms":{}}')}catch(_){return {listings:[],inbox:[],rooms:{}}}})();
+ const saveOnline=()=>localStorage.setItem(ONLINE_KEY,JSON.stringify(state));
+ const name=()=>localStorage.getItem(NAME_KEY)||"Guest Trader";
+ const cleanText=(value,max=500)=>String(value||"").replace(/[<>]/g,"").trim().slice(0,max);
+ const blocked=text=>badWords.some(w=>String(text).toLowerCase().includes(w));
+ const api=async(path,options={})=>{try{const r=await fetch('/api'+path,{headers:{'Content-Type':'application/json','X-OTL-User':name(),...(options.headers||{})},...options});if(!r.ok)throw 0;return await r.json()}catch(_){return null}};
+ const itemById=id=>items.find(x=>String(x.id)===String(id));
+ const slotHTML=x=>x?`<div class="onlineSlot ${rarityClass(x.rarity)}">${artImg(x)}<span title="${esc(x.name)}">${esc(x.name)}</span></div>`:`<div class="onlineSlot"></div>`;
+ const slotsHTML=ids=>Array.from({length:8},(_,i)=>slotHTML(itemById((ids||[])[i]))).join('');
+ function updatePostPreview(){const a=document.getElementById('postGivePreview'),b=document.getElementById('postWantPreview');if(a)a.innerHTML=slotsHTML(trade.yours.map(x=>x.id));if(b)b.innerHTML=slotsHTML(trade.theirs.map(x=>x.id))}
+ const originalRenderTrade=window.renderTrade;window.renderTrade=function(){originalRenderTrade();updatePostPreview()};
+ function remaining(ts){const n=Math.max(0,ts-Date.now());if(!n)return 'Ended';const h=Math.ceil(n/36e5);return h<24?h+'h left':Math.ceil(h/24)+'d left'}
+ function renderMarket(){const box=document.getElementById('marketCards');if(!box)return;const q=(document.getElementById('marketSearch')?.value||'').toLowerCase(),type=document.getElementById('marketType')?.value||'';const rows=state.listings.filter(x=>(!type||x.type===type)&&(!q||JSON.stringify(x).toLowerCase().includes(q))).sort((a,b)=>b.created-a.created);box.innerHTML=rows.length?rows.map(x=>`<article class="marketCard"><div class="marketCardHead"><div><h3>${esc(x.title)}</h3><div class="marketMeta">${esc(x.owner)} · ${x.type==='auction'?'Auction':'Trade'} · ${remaining(x.expires)}</div></div><b>${x.type==='auction'?(x.bids?.length||0)+' bids':''}</b></div><p>${esc(x.description||'No extra description.')}</p><div class="marketOffers"><div><h4>${x.type==='auction'?'AUCTION ITEM':'OWNER GIVES'}</h4><div class="slotGrid">${slotsHTML(x.give)}</div></div><div><h4>${x.type==='auction'?'CURRENT BEST OFFER':'OWNER WANTS'}</h4><div class="slotGrid">${slotsHTML(x.type==='auction'?(x.bids?.[0]?.items||[]):x.want)}</div></div></div><div class="onlineActions">${x.owner===name()?`<button onclick="otlDeleteListing('${x.id}')">REMOVE</button>`:x.type==='auction'?`<button onclick="otlBid('${x.id}')">BID CURRENT YOUR OFFER</button>`:`<button onclick="otlAccept('${x.id}')">ACCEPT TRADE</button>`}</div></article>`).join(''):'<div class="emptyState">No matching online listings yet.</div>'}
+ function notify(title,body){if(Notification.permission==='granted')new Notification(title,{body,icon:'assets/ohio-trade-lab-logo.png'})}
+ function addInbox(text,roomId=''){state.inbox.unshift({id:crypto.randomUUID(),text,roomId,time:Date.now(),read:false});saveOnline();renderInbox();notify('Ohio Trade Lab',text)}
+ function renderInbox(){const box=document.getElementById('onlineInboxList');if(!box)return;box.innerHTML=state.inbox.length?state.inbox.map(x=>`<div class="inboxEntry"><b>${esc(x.text)}</b><div class="marketMeta">${new Date(x.time).toLocaleString()}</div>${x.roomId?`<button class="onlinePrimary" onclick="otlOpenRoom('${x.roomId}')">OPEN ROOM</button>`:''}</div>`).join(''):'<div class="emptyState">No online notifications yet.</div>'}
+ function openRoom(id){localStorage.setItem(ROOM_KEY,id);const room=state.rooms[id];const box=document.getElementById('tradeRoom');if(!box)return;if(!room){box.innerHTML='<div class="roomEmpty">Room not found.</div>';return}box.innerHTML=`<div class="roomHeader"><div><b>${esc(room.title)}</b><div class="marketMeta">Private room · ${room.members.map(esc).join(' and ')}</div></div></div><div class="roomMessages" id="roomMessages">${room.messages.map(m=>`<div class="roomMessage ${m.author===name()?'mine':''}"><b>${esc(m.author)}</b><div>${esc(m.text)}</div></div>`).join('')}</div><div class="roomComposer"><input id="roomInput" maxlength="300" placeholder="Message about the trade, game, item, or username..."><button class="onlinePrimary" onclick="otlSendRoom('${id}')">SEND</button></div>`;const msgs=document.getElementById('roomMessages');if(msgs)msgs.scrollTop=msgs.scrollHeight}
+ window.otlDeleteListing=id=>{state.listings=state.listings.filter(x=>x.id!==id);saveOnline();renderMarket()};
+ window.otlAccept=id=>{const x=state.listings.find(v=>v.id===id);if(!x)return;const roomId=crypto.randomUUID();state.rooms[roomId]={id:roomId,title:x.title,members:[x.owner,name()],messages:[{author:'Ohio Trade Lab',text:'Trade accepted. Use this private room to coordinate joining the same game and completing the in-game trade.'}]};state.listings=state.listings.filter(v=>v.id!==id);addInbox(`You accepted ${x.owner}'s trade.`,roomId);saveOnline();renderMarket();openRoom(roomId)};
+ window.otlBid=id=>{const x=state.listings.find(v=>v.id===id);if(!x||!trade.yours.length){document.getElementById('status').textContent='Add your bid items to Your Offer first.';return}x.bids=x.bids||[];x.bids.push({bidder:name(),items:trade.yours.slice(0,8).map(v=>v.id),value:tradeTotal('yours'),time:Date.now()});x.bids.sort((a,b)=>b.value-a.value);addInbox(`Bid submitted on ${x.title}.`);saveOnline();renderMarket()};
+ window.otlOpenRoom=openRoom;window.otlSendRoom=id=>{const input=document.getElementById('roomInput'),text=cleanText(input?.value,300);if(!text)return;if(blocked(text)){document.getElementById('status').textContent='That message was blocked by the safety filter. Do not send passwords, login codes, shortened links, or invite links.';return}state.rooms[id].messages.push({author:name(),text,time:Date.now()});saveOnline();openRoom(id)};
+ async function initOnline(){document.getElementById('onlineName').value=name()==='Guest Trader'?'':name();document.querySelectorAll('.onlineTab').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.onlineTab').forEach(x=>x.classList.toggle('active',x===btn));document.querySelectorAll('.onlineView').forEach(x=>x.classList.remove('active'));document.getElementById('online'+btn.dataset.onlineView[0].toUpperCase()+btn.dataset.onlineView.slice(1)).classList.add('active')});document.getElementById('saveOnlineName').onclick=()=>{const v=cleanText(document.getElementById('onlineName').value,24);if(v)localStorage.setItem(NAME_KEY,v);document.getElementById('status').textContent='Online display name saved.'};document.getElementById('notifyBtn').onclick=async()=>{if(!('Notification'in window))return;const p=await Notification.requestPermission();document.getElementById('notifyBtn').textContent=p==='granted'?'NOTIFICATIONS ON':'NOTIFICATIONS BLOCKED'};document.getElementById('marketSearch').oninput=renderMarket;document.getElementById('marketType').onchange=renderMarket;document.getElementById('refreshMarket').onclick=renderMarket;document.getElementById('postTradeBtn').onclick=()=>{const title=cleanText(document.getElementById('listingTitle').value,70),description=cleanText(document.getElementById('listingDescription').value,500);if(!title||!trade.yours.length){document.getElementById('status').textContent='Add at least one item to Your Offer and enter a title.';return}if(blocked(title+' '+description)){document.getElementById('status').textContent='The listing was blocked by the safety filter.';return}state.listings.push({id:crypto.randomUUID(),type:'trade',owner:name(),title,description,give:trade.yours.slice(0,8).map(x=>x.id),want:trade.theirs.slice(0,8).map(x=>x.id),created:Date.now(),expires:Date.now()+Number(document.getElementById('listingExpiry').value)*36e5});saveOnline();renderMarket();document.getElementById('status').textContent='Trade listing posted.'};const ai=document.getElementById('auctionItem');ai.innerHTML='<option value="">Choose an item</option>'+items.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} · ${money(x.value)}</option>`).join('');document.getElementById('postAuctionBtn').onclick=()=>{const item=itemById(ai.value),title=cleanText(document.getElementById('auctionTitle').value,70),description=cleanText(document.getElementById('auctionDescription').value,500);if(!item||!title){document.getElementById('status').textContent='Choose an auction item and enter a title.';return}if(blocked(title+' '+description)){document.getElementById('status').textContent='The auction was blocked by the safety filter.';return}state.listings.push({id:crypto.randomUUID(),type:'auction',owner:name(),title,description,give:[item.id],want:[],bids:[],created:Date.now(),expires:Date.now()+Number(document.getElementById('auctionDuration').value)*36e5});saveOnline();renderMarket();document.getElementById('status').textContent='Auction posted.'};updatePostPreview();renderMarket();renderInbox();const active=localStorage.getItem(ROOM_KEY);if(active)openRoom(active);const online=await api('/health');if(online?.ok)document.getElementById('onlineModeNote').textContent='Connected to the Ohio Trade Lab online service.'}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOnline);else initOnline();
+})();
+</script>
 </body>
 </html>

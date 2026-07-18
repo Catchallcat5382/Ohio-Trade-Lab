@@ -1,0 +1,8 @@
+name = "ohio-trade-lab-api"
+main = "src.js"
+compatibility_date = "2026-07-18"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ohio-trade-lab"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
