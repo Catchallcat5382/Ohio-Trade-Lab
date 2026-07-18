@@ -162,6 +162,13 @@ input:focus,select:focus{border-color:#824fc0}
 @media(max-width:1000px){.sidebar{overflow:visible!important}.sideNav{overflow-x:auto!important;overflow-y:hidden!important;padding-bottom:4px!important}.groupHead{align-items:flex-start}.subgroupBlock{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.subgroupBlock{grid-template-columns:repeat(2,minmax(0,1fr))}.groupHead h3{font-size:16px}}
 </style>
+
+<style id="v35-inventory-picker-fix">
+.inventoryPickerPanel{margin:0 0 16px;padding:14px;border:1px solid #2b3750;border-radius:12px;background:linear-gradient(145deg,#101827,#080d17);box-shadow:0 10px 30px #0005}
+.inventoryPickerTitle{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}.inventoryPickerTitle b{color:#e9ddff;letter-spacing:.08em}.inventoryPickerTitle span{color:#8e9bb1;font-size:12px}
+.inventoryPickerControls{display:grid;grid-template-columns:minmax(210px,.8fr) minmax(280px,1.5fr) auto;gap:9px}.inventoryPickerControls input,.inventoryPickerControls select{min-width:0}
+@media(max-width:760px){.inventoryPickerTitle{align-items:flex-start;flex-direction:column}.inventoryPickerControls{grid-template-columns:1fr}.inventoryPickerControls .topBtn{width:100%}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -268,7 +275,11 @@ input:focus,select:focus{border-color:#824fc0}
  <section id="categories" class="page"><div class="panel"><div class="dataWarning">Select a category to browse its entries.</div><div id="categoryCards" class="categoryCards"></div></div></section>
 
  <section id="inventory" class="page"><div class="panel">
-  <div class="inventoryHero"><div><h2>MY INVENTORY</h2><p>Add anything you own and see its combined estimated value.</p></div><div class="inventoryActions"><button class="topBtn" id="exportInventoryBtn">EXPORT</button><button class="topBtn" id="importInventoryBtn">IMPORT</button><button class="clear" id="clearInventoryBtn">CLEAR</button><input id="inventoryFile" type="file" accept="application/json" hidden></div></div>
+  <div class="inventoryHero"><div><h2>MY INVENTORY</h2><p>Choose the guns or items you own from the catalog. Your inventory saves automatically on this device.</p></div><div class="inventoryActions"><button class="clear" id="clearInventoryBtn">CLEAR INVENTORY</button></div></div>
+  <div class="inventoryPickerPanel">
+   <div class="inventoryPickerTitle"><b>ADD TO INVENTORY</b><span>Search the available catalog, select an entry, then add it.</span></div>
+   <div class="inventoryPickerControls"><input id="inventoryPickerSearch" placeholder="Search guns, skins, sets, or items..."><select id="inventoryPicker"><option value="">Choose an item...</option></select><button class="topBtn" id="inventoryPickerAdd">ADD ITEM</button></div>
+  </div>
   <div id="inventoryStats" class="bottomStats"></div>
   <div class="toolbar"><input id="inventorySearch" placeholder="Search your inventory..."><select id="inventorySort"><option value="value">Highest total value</option><option value="name">Name A–Z</option><option value="quantity">Highest quantity</option></select></div>
   <div id="inventoryRows" class="inventoryRows"></div>
@@ -793,6 +804,30 @@ function inventoryChange(id,delta){
  saveInventory();renderInventory();
 }
 function inventoryRemove(id){inventory=inventory.filter(x=>String(x.id)!==String(id));saveInventory();renderInventory()}
+function inventoryCatalogPool(){
+ return [...items].filter(x=>x&&x.id&&x.name&&x.value>0).sort((a,b)=>{
+  const sa=String(a.section||a.category||"Other"),sb=String(b.section||b.category||"Other");
+  return sa.localeCompare(sb)||String(a.set||"").localeCompare(String(b.set||""))||a.name.localeCompare(b.name);
+ });
+}
+function fillInventoryPicker(){
+ const select=$("#inventoryPicker");if(!select)return;
+ const query=($("#inventoryPickerSearch")?.value||"").trim().toLowerCase();
+ const pool=inventoryCatalogPool().filter(x=>!query||(x.name+" "+x.set+" "+x.weapon+" "+x.section+" "+x.category).toLowerCase().includes(query));
+ const groups=new Map();
+ for(const item of pool.slice(0,750)){
+  const group=item.section||item.category||"Other";
+  if(!groups.has(group))groups.set(group,[]);
+  groups.get(group).push(item);
+ }
+ select.innerHTML='<option value="">Choose an item...</option>'+[...groups.entries()].map(([group,list])=>`<optgroup label="${esc(group)}">${list.map(item=>`<option value="${esc(item.id)}">${esc(item.name)} — ${money(item.value)}</option>`).join("")}</optgroup>`).join("");
+}
+function addInventoryPickerSelection(){
+ const id=$("#inventoryPicker")?.value;
+ if(!id){$("#status").textContent="Choose an item before adding it to your inventory.";return;}
+ inventoryAdd(id);
+ $("#inventoryPicker").value="";
+}
 function renderInventory(){
  const host=$("#inventoryRows");if(!host)return;
  let rows=inventory.map(row=>({row,item:items.find(x=>String(x.id)===String(row.id))})).filter(x=>x.item);
@@ -803,12 +838,9 @@ function renderInventory(){
  const totalValue=inventory.reduce((s,x)=>{const it=items.find(i=>String(i.id)===String(x.id));return s+(it?it.value*(Number(x.quantity)||0):0)},0);
  const unique=inventory.filter(x=>items.some(i=>String(i.id)===String(x.id))).length;
  $("#inventoryStats").innerHTML=`<div class="stat"><span>▤</span><div>TOTAL ITEMS<b>${totalQty}</b></div></div><div class="stat blue"><span>▦</span><div>UNIQUE ENTRIES<b>${unique}</b></div></div><div class="stat green"><span>$</span><div>ESTIMATED VALUE<b>${money(totalValue)}</b></div></div>`;
- host.innerHTML=rows.map(({row,item})=>`<article class="inventoryRow"><div class="inventoryImage">${artImg(item)}</div><div class="inventoryInfo"><b>${esc(item.name)}</b><span>${esc(item.set)}${item.weapon?" · "+esc(item.weapon):""}</span></div><div class="inventoryEach"><small>Each</small><b>${money(item.value)}</b></div><div class="quantityControl"><button onclick="inventoryChange('${esc(item.id)}',-1)">−</button><strong>${row.quantity}</strong><button onclick="inventoryChange('${esc(item.id)}',1)">+</button></div><div class="inventoryTotal"><small>Total</small><b>${money(item.value*row.quantity)}</b></div><button class="inventoryRemove" onclick="inventoryRemove('${esc(item.id)}')" title="Remove">×</button></article>`).join("")||'<div class="emptyState">Your inventory is empty. Add items using the + Inventory buttons around the site.</div>';
+ host.innerHTML=rows.map(({row,item})=>`<article class="inventoryRow"><div class="inventoryImage">${artImg(item)}</div><div class="inventoryInfo"><b>${esc(item.name)}</b><span>${esc(item.set)}${item.weapon?" · "+esc(item.weapon):""}</span></div><div class="inventoryEach"><small>Each</small><b>${money(item.value)}</b></div><div class="quantityControl"><button onclick="inventoryChange('${esc(item.id)}',-1)">−</button><strong>${row.quantity}</strong><button onclick="inventoryChange('${esc(item.id)}',1)">+</button></div><div class="inventoryTotal"><small>Total</small><b>${money(item.value*row.quantity)}</b></div><button class="inventoryRemove" onclick="inventoryRemove('${esc(item.id)}')" title="Remove">×</button></article>`).join("")||'<div class="emptyState">Your inventory is empty. Use the Add to Inventory picker above to choose the guns or items you own.</div>';
 }
-function exportInventory(){const blob=new Blob([JSON.stringify({version:1,inventory},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ohio-trade-lab-inventory.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-function importInventoryFile(file){const r=new FileReader();r.onload=()=>{try{const parsed=JSON.parse(r.result),list=Array.isArray(parsed)?parsed:parsed.inventory;if(!Array.isArray(list))throw Error("Invalid inventory file");inventory=list.map(x=>({id:String(x.id),quantity:Math.max(1,Number(x.quantity)||1)}));saveInventory();renderInventory();$("#status").textContent="Inventory imported successfully."}catch(e){alert("That inventory file could not be imported.")}};r.readAsText(file)}
-
-function renderEverything(){items=items.map(norm).filter(x=>x.name&&x.value>0&&!/admin|invisible/i.test(x.name+" "+x.set+" "+x.category+" "+x.sourcePost));fillFilters();initSelectors();renderTrade();renderSkins();renderGems();renderItems();renderCategories();renderAll();renderSummary();renderManager();renderInventory()}
+function renderEverything(){items=items.map(norm).filter(x=>x.name&&x.value>0&&!/admin|invisible/i.test(x.name+" "+x.set+" "+x.category+" "+x.sourcePost));fillFilters();initSelectors();renderTrade();renderSkins();renderGems();renderItems();renderCategories();renderAll();renderSummary();renderManager();fillInventoryPicker();renderInventory()}
 function openPage(page){
  $$("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
  $$(".page").forEach(x=>x.classList.toggle("active",x.id===page));
@@ -827,6 +859,7 @@ $$("[data-page]").forEach(b=>b.onclick=()=>openPage(b.dataset.page));
 ["#gemSearch","#gemSet","#gemSort"].forEach(s=>$(s).addEventListener("input",renderGems));
 ["#itemSearch","#itemSection","#itemSet","#itemSort"].forEach(s=>$(s).addEventListener("input",renderItems));
 ["#inventorySearch","#inventorySort"].forEach(s=>$(s).addEventListener("input",renderInventory));
+$("#inventoryPickerSearch").addEventListener("input",fillInventoryPicker);
 ["#allSearch","#allSet","#allRarity","#allWeapon","#allSource"].forEach(s=>$(s).addEventListener("input",renderAll));
 function parseGviz(resp){let cols=resp.table.cols.map(c=>c.label||c.id);return resp.table.rows.map(r=>Object.fromEntries(cols.map((c,i)=>[c,r.c[i]?.v??""]))).map(norm).filter(x=>x.name&&x.value>0)}
 window.sheetCallback=function(resp){try{let synced=parseGviz(resp);if(!synced.length)throw Error("No usable rows returned");items=synced;save();renderEverything();$("#status").textContent=`Online database synced successfully: ${items.length} rows.`}catch(e){tryCsvSync("GViz returned unusable data: "+e.message)}}
@@ -837,9 +870,8 @@ $("#syncBtn").onclick=()=>{$("#status").textContent="The value database is ready
 $("#resetBtn").onclick=()=>{if(confirm("Reset the local database to the newest built-in version?")){items=structuredClone(EMBEDDED).map(norm);storageRemove(DATA_KEY);trade={yours:[],theirs:[]};save();renderEverything();$("#status").textContent="Local data was reset."}}
 $("#themeBtn").onclick=()=>document.body.classList.toggle("dim");
 $("#findMatchesBtn").onclick=findBestMatches;
-$("#exportInventoryBtn").onclick=exportInventory;
-$("#importInventoryBtn").onclick=()=>$("#inventoryFile").click();
-$("#inventoryFile").onchange=e=>{if(e.target.files[0])importInventoryFile(e.target.files[0]);e.target.value=""};
+$("#inventoryPickerAdd").onclick=addInventoryPickerSelection;
+$("#inventoryPicker").addEventListener("keydown",e=>{if(e.key==="Enter")addInventoryPickerSelection()});
 $("#clearInventoryBtn").onclick=()=>{if(confirm("Clear your entire inventory?")){inventory=[];saveInventory();renderInventory()}};
 function initializeApp(){
  try{

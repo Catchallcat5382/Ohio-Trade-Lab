@@ -1,34 +1,9 @@
-Ohio Trade Lab V33 rarity correction
+# Ohio Trade Lab V35
 
-- There are zero Epic items.
-- Confirmed Mythics remain Mythic.
-- Every other item defaults to Legendary.
-
-# Ohio Trade Lab V32
-
-This build adds the eight-slot in-game trade layout, image-based match suggestions, and an Online Hub interface for public trades, item-for-item auctions, inbox notifications, and private trade rooms.
-
-## Website deployment
-Upload the project root to Cloudflare Pages. The catalog, calculator, inventory, and local demo Online Hub work immediately.
-
-## Making the Online Hub shared between real visitors
-The ZIP includes a Cloudflare Worker + D1 backend in `worker/`.
-
-1. Install Wrangler: `npm install -g wrangler`
-2. Log in: `wrangler login`
-3. From `worker/`, create the database: `wrangler d1 create ohio-trade-lab`
-4. Put the returned database ID into `worker/wrangler.toml`.
-5. Apply the schema: `wrangler d1 migrations apply ohio-trade-lab --remote`
-6. Deploy: `wrangler deploy`
-7. Route `/api/*` from your site domain to that Worker, or deploy the Worker on the same domain using Cloudflare routes.
-
-Without those deployment steps, Online Hub uses browser-local demo data. A static Pages ZIP alone cannot securely share listings or private chats across different users.
-
-## Safety and privacy
-The included filter blocks common shortened/invite links, password/login-code requests, and unsafe account-information requests. Display names, Roblox usernames, item names, gun names, and normal trade descriptions are allowed. This is a basic starter filter, not a substitute for moderation, account authentication, reporting, rate limits, or production security review.
-
-## V34 inventory-only value matcher
-- Added a matcher source selector: full database or only items saved in My Inventory.
-- Inventory-only suggestions respect owned quantities and the eight-slot trade limit.
-- When the inventory cannot reach the target, the matcher clearly reports that and still shows the closest possible offers.
-- Empty or valueless inventories now receive a clear message instead of returning misleading suggestions.
+## Inventory fix
+- Removed inventory import and export controls.
+- Added a built-in searchable catalog picker directly on the Inventory page.
+- Choose a gun, skin, gem, or item from the available options and press **Add Item**.
+- Adding the same entry again increases its quantity.
+- Inventory continues to save automatically in the browser.
+- Quantity, individual removal, clear inventory, total value, and inventory-only trade matching remain available.
