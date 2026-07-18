@@ -1,9 +1,3 @@
-# Ohio Trade Lab V28
+# Ohio Trade Lab V29 — Exact Image Matching Fix
 
-Public trading-value website build.
-
-## V28 changes
-- Weapon skins are grouped only by their skin set, such as Atomic, Void, or Cyberpunks.
-- Removed the extra heading for every individual gun inside a skin set.
-- The same simpler organization is used in the Skins tab and trade item selectors.
-- Item and gem categories keep their useful subgroup organization.
+This build validates images using both the skin set and the weapon/item name. It no longer copies one gun image across unrelated sets. For example, the Void Riot Shield image is used only for Void Riot Shield entries, and the Void Saiga 12 image is not reused for Emerald, Ruby, Halloween, Holy, Reaper, or Solid Gold Saiga 12 entries. Entries without a confirmed exact image are intentionally left blank rather than showing the wrong image.

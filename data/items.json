@@ -10,1015 +10,12 @@
     "withImages": 252,
     "officialImageCatalog": 201,
     "sections": 11,
-    "organization": "Tabs and trade selectors are grouped by section and subgroup."
+    "organization": "Tabs and trade selectors are grouped by section and subgroup.",
+    "exactImageValidation": "V29: images are matched by both skin set and weapon/item identity; cross-set weapon image reuse removed.",
+    "mismatchedImagesRemoved": 48,
+    "exactImagesAdded": 20
   },
-  "images": [
-    {
-      "name": "Aug",
-      "set": "Cyberpunks",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/e0a9e409b_Screenshot2026-03-07at94634PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Cyberpunks",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/c671d430c_Screenshot2026-03-07at91941PM.png"
-    },
-    {
-      "name": "M4",
-      "set": "Cyberpunks",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/4cbcbf98d_Screenshot2026-03-07at94640PM.png"
-    },
-    {
-      "name": "Ak",
-      "set": "Cyberpunks",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/f454bcbb0_Screenshot2026-03-07at94628PM.png"
-    },
-    {
-      "name": "Tommy",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/8c9973d35_Screenshot2026-03-25at52724PM.png"
-    },
-    {
-      "name": "Sawn Off",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/81b45bc46_Screenshot2026-03-25at52700PM.png"
-    },
-    {
-      "name": "Double Barrel",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/18f2d42c7_Screenshot2026-03-25at52656PM.png"
-    },
-    {
-      "name": "Rpk",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/6b3ea7b02_Screenshot2026-03-25at52714PM.png"
-    },
-    {
-      "name": "Uzi",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/3642a4fee_Screenshot2026-03-25at52651PM.png"
-    },
-    {
-      "name": "Glock 18",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/f4e1c7c81_Screenshot2026-03-25at52644PM.png"
-    },
-    {
-      "name": "Glock",
-      "set": "Cyberpunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/eade81890_Screenshot2026-03-25at52639PM.png"
-    },
-    {
-      "name": "Amethyst Rpg",
-      "set": "Atomics",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/7918c8514_Screenshot2026-03-07at95323PM.png"
-    },
-    {
-      "name": "Amethyst Val",
-      "set": "Atomics",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e3694387c_Screenshot2026-04-02at113028PM.png"
-    },
-    {
-      "name": "Amethyst M4",
-      "set": "Atomics",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/8b1c62ce8_Screenshot2026-03-07at95335PM.png"
-    },
-    {
-      "name": "Amethyst Double Barrel",
-      "set": "Atomics",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/bf8b62e72_Screenshot2026-03-07at95332PM.png"
-    },
-    {
-      "name": "Nature M4",
-      "set": "Atomics",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/84085fa99_Screenshot2026-04-01at104404PM.png"
-    },
-    {
-      "name": "Nature Double Barrel",
-      "set": "Atomics",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/7fc01cd80_Screenshot2026-03-07at95328PM.png"
-    },
-    {
-      "name": "Water RPG",
-      "set": "Atomics",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ed75e4752_Screenshot2026-03-31at54441PM.png"
-    },
-    {
-      "name": "Water M4",
-      "set": "Atomics",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d8190f7b4_Screenshot2026-04-01at104409PM.png"
-    },
-    {
-      "name": "Flame RPG",
-      "set": "Atomics",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/79915661a_Screenshot2026-03-31at54447PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Future Whites",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/f70325b97_Screenshot2026-03-07at95014PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Tacticals",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/9723c5f6f_Screenshot2026-03-07at95118PM.png"
-    },
-    {
-      "name": "Ak",
-      "set": "Tacticals",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/113f77563_Screenshot2026-04-01at104030PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "TAC V3",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/963fa62fb_Screenshot2026-03-07at95105PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Reapers",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/50a1b7b8f_Screenshot2026-03-07at94804PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Reapers",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/5c56426a9_Screenshot2026-03-07at94817PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Steampunks",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/c5b99af8c_Screenshot2026-03-07at94938PM.png"
-    },
-    {
-      "name": "Mp7",
-      "set": "Steampunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d9acb7321_Screenshot2026-04-02at113224PM.png"
-    },
-    {
-      "name": "Tommy",
-      "set": "Steampunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/f0d557dea_Screenshot2026-04-02at113231PM.png"
-    },
-    {
-      "name": "Sawn Off",
-      "set": "Steampunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/53d169826_Screenshot2026-04-02at113216PM.png"
-    },
-    {
-      "name": "Double Barrel",
-      "set": "Steampunks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/28ff67002_Screenshot2026-04-02at113220PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Sub Zeros",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/6ea6f0c8c_Screenshot2026-03-07at95144PM.png"
-    },
-    {
-      "name": "M4",
-      "set": "Sub Zeros",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/8b7c8800c_Screenshot2026-04-01at104436PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Sub Zeros",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/184897b13_Screenshot2026-04-01at105721PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Frozen Golds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/cc0aaa121_Screenshot2026-04-01at105751PM.png"
-    },
-    {
-      "name": "AUG",
-      "set": "Elites",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/96bbed42e_Screenshot2026-03-07at95113PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Sakuras",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9054e10a0_Screenshot2026-03-25at52328PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Sakuras",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/77a1ec65b_Screenshot2026-03-07at94551PM.png"
-    },
-    {
-      "name": "Tommy",
-      "set": "Sakuras",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/46090d014_Screenshot2026-03-07at94546PM.png"
-    },
-    {
-      "name": "Uzi",
-      "set": "Sakuras",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/4fbb140d1_Screenshot2026-03-07at94458PM.png"
-    },
-    {
-      "name": "Python",
-      "set": "Sakuras",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/b91501d6b_Screenshot2026-03-07at94532PM.png"
-    },
-    {
-      "name": "AK",
-      "set": "Sakura V2s",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e567ad762_Screenshot2026-03-25at52418PM.png"
-    },
-    {
-      "name": "RPK",
-      "set": "Sakura V2s",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/230d63702_Screenshot2026-03-25at52407PM.png"
-    },
-    {
-      "name": "AWP",
-      "set": "Sakura V2s",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ba8b77a67_Screenshot2026-03-25at52423PM.png"
-    },
-    {
-      "name": "Spas-12",
-      "set": "Sakura V2s",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/54be25c22_Screenshot2026-03-07at94506PM.png"
-    },
-    {
-      "name": "Raygun",
-      "set": "Sakura V2s",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ff05b2c76_Screenshot2026-03-25at52412PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Death Blossums",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/bf295a1bd_Screenshot2026-04-01at105741PM.png"
-    },
-    {
-      "name": "Tommy",
-      "set": "Death Blossums",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/77f9debee_Screenshot2026-03-07at95422PM.png"
-    },
-    {
-      "name": "AK",
-      "set": "Death Blossums V2",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0b13bcada_Screenshot2026-04-02at112901PM.png"
-    },
-    {
-      "name": "RPK",
-      "set": "Death Blossums V2",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/3ed631c0e_Screenshot2026-04-02at112930PM.png"
-    },
-    {
-      "name": "AWP",
-      "set": "Death Blossums V2",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/302e65ee9_Screenshot2026-04-02at112907PM.png"
-    },
-    {
-      "name": "Spas-12",
-      "set": "Death Blossums V2",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/7f47434af_Screenshot2026-04-02at112916PM.png"
-    },
-    {
-      "name": "Raygun",
-      "set": "Death Blossums V2",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/334db1b00_Screenshot2026-04-02at112921PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Mystics",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a2b0075a4_Screenshot2026-03-31at54502PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Mystics",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/f2c1bf318_Screenshot2026-03-07at95212PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Void Nightmares",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/8f8a33dfb_Screenshot2026-03-07at95217PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "WW2's",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/4d6d22c92_Screenshot2026-03-07at95137PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Gingerbreads",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/41e1bb7d7_Screenshot2026-04-01at103637PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Gingerbreads",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e8c97963c_Screenshot2026-04-01at104721PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Gingerbreads",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/80f4596f2_Screenshot2026-04-01at104609PM.png"
-    },
-    {
-      "name": "M1 Garand",
-      "set": "Gingerbreads",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/bb48edb1e_Screenshot2026-04-01at104516PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Gingerbreads",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e5fbf4d5f_Screenshot2026-04-01at104539PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Gingerbreads",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/595b3ea1d_Screenshot2026-04-01at103717PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Freeze Rays",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/16dfee8d7_Screenshot2026-04-01at104605PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Freeze Rays",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/b55f825c4_Screenshot2026-04-01at104710PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Freeze Rays",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c39501151_Screenshot2026-04-01at103654PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Freeze Rays",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0c26a66bc_Screenshot2026-04-01at104524PM.png"
-    },
-    {
-      "name": "Mp7",
-      "set": "Freeze Rays",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e4b6a8f75_Screenshot2026-04-01at104450PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Void Rays",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/4be4d3209_Screenshot2026-03-07at95125PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Frozen Diamonds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c7a291b3c_Screenshot2026-05-17at80536PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Frozen Diamonds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/30d692c89_Screenshot2026-05-17at80527PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Frozen Diamonds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/05cac2555_Screenshot2026-05-17at80540PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Frozen Diamonds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/4c335962e_Screenshot2026-05-17at80523PM.png"
-    },
-    {
-      "name": "Mp7",
-      "set": "Frozen Diamonds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/7f099063f_Screenshot2026-05-17at80547PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Hyperlasers",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/1b3bbb55b_Screenshot2026-03-07at95049PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Roses",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/eba38d52f_Screenshot2026-03-07at94933PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Roses",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a9b777f61_Screenshot2026-04-02at112945PM.png"
-    },
-    {
-      "name": "M1 Garand",
-      "set": "Roses",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1feb13f66_Screenshot2026-04-02at112958PM.png"
-    },
-    {
-      "name": "Dragonov",
-      "set": "Roses",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0d32277a5_Screenshot2026-04-02at113005PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Roses",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/94df7975d_Screenshot2026-04-02at112952PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Black Roses",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/b679641db_Screenshot2026-03-07at95044PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Diamond Pixels",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/95b69acfa_Screenshot2026-03-07at95020PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Golden Dragons",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/68def7b9f_Screenshot2026-03-07at92215PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Golden Dragons",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/c7ce56ede_Screenshot2026-03-07at92148PM.png"
-    },
-    {
-      "name": "Fal",
-      "set": "Golden Dragons",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/e4b7dca61_Screenshot2026-03-07at92143PM.png"
-    },
-    {
-      "name": "SPAS-12",
-      "set": "Golden Dragons",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/c8db047d6_Screenshot2026-03-07at92208PM.png"
-    },
-    {
-      "name": "M1 Garand",
-      "set": "Golden Dragons",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/0ca34644e_Screenshot2026-03-07at92204PM.png"
-    },
-    {
-      "name": "Scar L",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/5f7cc9451_Screenshot2026-04-02at112812PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/03acdefe5_Screenshot2026-04-02at112734PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d0cca78b8_Screenshot2026-04-02at112740PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Voids",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/d00e99892_Screenshot2026-03-07at94737PM.png"
-    },
-    {
-      "name": "Ray Gun",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/08f7a2653_Screenshot2026-04-02at113937PM.png"
-    },
-    {
-      "name": "RPK",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/f6cecf98b_Screenshot2026-04-02at112755PM.png"
-    },
-    {
-      "name": "M4",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/cb43046f2_Screenshot2026-04-02at112750PM.png"
-    },
-    {
-      "name": "Barrett",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/772cf0eb3_Screenshot2026-04-02at113915PM.png"
-    },
-    {
-      "name": "Ak",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/910e2aadb_Screenshot2026-04-02at113903PM.png"
-    },
-    {
-      "name": "Tommy",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1c51c459a_Screenshot2026-04-02at113859PM.png"
-    },
-    {
-      "name": "M249 Saw",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/4832dee49_Screenshot2026-04-02at113852PM.png"
-    },
-    {
-      "name": "Riot Shield",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png"
-    },
-    {
-      "name": "Sawn",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/f05e5805e_Screenshot2026-04-02at113843PM.png"
-    },
-    {
-      "name": "Mp7",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/426b52331_Screenshot2026-04-02at113932PM.png"
-    },
-    {
-      "name": "Double Barrel",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a38103b3c_Screenshot2026-04-02at113922PM.png"
-    },
-    {
-      "name": "Deagle",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/61541355b_Screenshot2026-04-02at113942PM.png"
-    },
-    {
-      "name": "Flamethrower",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png"
-    },
-    {
-      "name": "Uzi",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/90645d1f2_Screenshot2026-04-02at114002PM.png"
-    },
-    {
-      "name": "Mossberg",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/24e6ad3f1_Screenshot2026-04-02at114007PM.png"
-    },
-    {
-      "name": "Ar-15",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c78b42b9d_Screenshot2026-04-02at114018PM.png"
-    },
-    {
-      "name": "Glock 18",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ceea470cc_Screenshot2026-04-02at113955PM.png"
-    },
-    {
-      "name": "Saiga 12",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png"
-    },
-    {
-      "name": "Stagecoach",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/93802d84c_Screenshot2026-04-02at114030PM.png"
-    },
-    {
-      "name": "Dragonov",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/5d54dae47_Screenshot2026-04-01at104245PM.png"
-    },
-    {
-      "name": "M1911",
-      "set": "Voids",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/7699a9f8e_Screenshot2026-04-02at114036PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Solid Golds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-01at95613PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Solid Golds",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/33953c376_Screenshot2026-03-07at94653PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Solid Golds",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/df0199255_Screenshot2026-03-07at94658PM.png"
-    },
-    {
-      "name": "Fn Fal",
-      "set": "Obsidians",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Invisibles",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/cc99a4d3c_Screenshot2026-04-01at95557PM.png"
-    },
-    {
-      "name": "Minigun",
-      "set": "Admin Solid Golds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png"
-    },
-    {
-      "name": "Void Rose",
-      "set": "Roses",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1925f3005_Screenshot2026-03-25at52349PM.png"
-    },
-    {
-      "name": "Gold Rose",
-      "set": "Roses",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/844c53e63_Screenshot2026-03-25at52354PM.png"
-    },
-    {
-      "name": "Red",
-      "set": "Kunais",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a9d69775a_Screenshot2026-03-25at52359PM.png"
-    },
-    {
-      "name": "Spirit",
-      "set": "Kunais",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a96fb83d7_Screenshot2026-03-25at52345PM.png"
-    },
-    {
-      "name": "Scar L",
-      "set": "Dark Matters",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/04caa2a83_Screenshot2026-03-07at95004PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/4f544fdf8_Screenshot2026-04-01at104614PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/aad66f128_Screenshot2026-04-01at104534PM.png"
-    },
-    {
-      "name": "AS Val",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c674f4354_Screenshot2026-04-01at103619PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/58bed00f2_Screenshot2026-04-01at103705PM.png"
-    },
-    {
-      "name": "M4A1",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/3d09ee642_Screenshot2026-04-01at104423PM.png"
-    },
-    {
-      "name": "Barrett M107",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/290472037_Screenshot2026-04-01at105711PM.png"
-    },
-    {
-      "name": "AK-47",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/5fbaefdcc_Screenshot2026-04-01at103534PM.png"
-    },
-    {
-      "name": "RPK",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1af973937_Screenshot2026-04-01at104638PM.png"
-    },
-    {
-      "name": "M249 SAW",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/df0ff69d2_Screenshot2026-04-01at104349PM.png"
-    },
-    {
-      "name": "MP7",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/18bbbc08c_Screenshot2026-04-01at104455PM.png"
-    },
-    {
-      "name": "Tommy Gun",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/8166d4d1f_Screenshot2026-04-01at104807PM.png"
-    },
-    {
-      "name": "Sawn Off",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/3ceed22eb_Screenshot2026-04-01at104744PM.png"
-    },
-    {
-      "name": "Double Barrel",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2dd3a4064_Screenshot2026-04-01at104223PM.png"
-    },
-    {
-      "name": "Deagle",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c3d372fbd_Screenshot2026-04-01at104131PM.png"
-    },
-    {
-      "name": "Python",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/410cfa487_Screenshot2026-04-01at104547PM.png"
-    },
-    {
-      "name": "Glock",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0e6545957_Screenshot2026-04-01at104303PM.png"
-    },
-    {
-      "name": "Glock 18",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d24e299bc_Screenshot2026-04-01at104321PM.png"
-    },
-    {
-      "name": "M1911",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/55ded9730_Screenshot2026-04-01at104336PM.png"
-    },
-    {
-      "name": "USP 45",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d869d5d2f_Screenshot2026-04-01at104824PM.png"
-    },
-    {
-      "name": "Mossberg",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/8e6871e5f_Screenshot2026-04-01at104503PM.png"
-    },
-    {
-      "name": "Saiga",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d30cee142_Screenshot2026-04-01at104649PM.png"
-    },
-    {
-      "name": "Stagecoach",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/edaab9c66_Screenshot2026-04-01at104801PM.png"
-    },
-    {
-      "name": "AR-15",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d74bd2a59_Screenshot2026-04-01at103556PM.png"
-    },
-    {
-      "name": "Uzi",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/f6d40c747_Screenshot2026-04-01at104833PM.png"
-    },
-    {
-      "name": "Dragunov",
-      "set": "Dark Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c916813fe_Screenshot2026-04-01at104238PM.png"
-    },
-    {
-      "name": "Scar L",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/b07628988_Screenshot2026-04-01at104657PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a3777095b_Screenshot2026-04-01at104620PM.png"
-    },
-    {
-      "name": "P90",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/cca9ad0d5_Screenshot2026-04-01at104529PM.png"
-    },
-    {
-      "name": "AS Val",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1c1dfd04b_Screenshot2026-04-01at103625PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/406fb453b_Screenshot2026-04-01at103659PM.png"
-    },
-    {
-      "name": "M4A1",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a3203b70a_Screenshot2026-04-01at104430PM.png"
-    },
-    {
-      "name": "AK-47",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ac091da73_Screenshot2026-04-01at103541PM.png"
-    },
-    {
-      "name": "Barrett M107",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a8a14e9cc_Screenshot2026-04-01at105741PM.png"
-    },
-    {
-      "name": "RPK",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/54b371e42_Screenshot2026-04-01at104645PM.png"
-    },
-    {
-      "name": "M249 SAW",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/6fd657d12_Screenshot2026-04-01at104353PM.png"
-    },
-    {
-      "name": "MP7",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0566df9d4_Screenshot2026-04-01at104446PM.png"
-    },
-    {
-      "name": "Tommy Gun",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/3858f4e54_Screenshot2026-04-01at104820PM.png"
-    },
-    {
-      "name": "Sawn Off",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/27f0a1a07_Screenshot2026-04-01at104755PM.png"
-    },
-    {
-      "name": "Double Barrel",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/76596e260_Screenshot2026-04-01at104229PM.png"
-    },
-    {
-      "name": "Deagle",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0c14d5f4b_Screenshot2026-04-01at104203PM.png"
-    },
-    {
-      "name": "Python",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/90a260b32_Screenshot2026-04-01at104553PM.png"
-    },
-    {
-      "name": "Glock",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/477488e9b_Screenshot2026-04-01at104308PM.png"
-    },
-    {
-      "name": "Glock 18",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0d1057d2e_Screenshot2026-04-01at104326PM.png"
-    },
-    {
-      "name": "M1911",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a0b785fbc_Screenshot2026-04-01at104341PM.png"
-    },
-    {
-      "name": "USP 45",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/7bfb3329c_Screenshot2026-04-01at104820PM.png"
-    },
-    {
-      "name": "Mossberg",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0e84bd901_Screenshot2026-04-01at104507PM.png"
-    },
-    {
-      "name": "Saiga",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/11a9960a9_Screenshot2026-04-01at104645PM.png"
-    },
-    {
-      "name": "Stagecoach",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e1b543c3f_Screenshot2026-04-01at104755PM.png"
-    },
-    {
-      "name": "AR-15",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/aa5274c62_Screenshot2026-04-01at103550PM.png"
-    },
-    {
-      "name": "Uzi",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/87dfc939c_Screenshot2026-04-01at104838PM.png"
-    },
-    {
-      "name": "Dragunov",
-      "set": "Anti Matters",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/195ededcf_Screenshot2026-04-01at104234PM.png"
-    },
-    {
-      "name": "Scar L",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/7bea7a42d_Screenshot2026-04-01at104715PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/789eb45f0_Screenshot2026-04-01at103648PM.png"
-    },
-    {
-      "name": "AS Val",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/724823af6_Screenshot2026-04-01at103631PM.png"
-    },
-    {
-      "name": "M4A1",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/15c457aa7_Screenshot2026-04-01at104417PM.png"
-    },
-    {
-      "name": "RPK",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/5aa91c5a8_Screenshot2026-04-01at104629PM.png"
-    },
-    {
-      "name": "AK-47",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/86796eba5_Screenshot2026-04-01at103525PM.png"
-    },
-    {
-      "name": "Sawn Off",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/735489ec8_Screenshot2026-04-01at104739PM.png"
-    },
-    {
-      "name": "Double Barrel",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/8ccdf574a_Screenshot2026-04-01at104219PM.png"
-    },
-    {
-      "name": "Deagle",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c13dc704e_Screenshot2026-04-01at104144PM.png"
-    },
-    {
-      "name": "Uzi",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0b8a6f92a_Screenshot2026-04-01at104829PM.png"
-    },
-    {
-      "name": "Glock",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/5b93fe19f_Screenshot2026-04-01at104258PM.png"
-    },
-    {
-      "name": "Glock 18",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/7ec48b401_Screenshot2026-04-01at104316PM.png"
-    },
-    {
-      "name": "AR-15",
-      "set": "Crimson Bloods",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/092b0701b_Screenshot2026-04-01at103604PM.png"
-    },
-    {
-      "name": "Tommy",
-      "set": "St Patricks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a1cb4d0e9_Screenshot2026-03-25at52443PM.png"
-    },
-    {
-      "name": "Python",
-      "set": "St Patricks",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/988108650_Screenshot2026-03-25at52318PM.png"
-    },
-    {
-      "name": "Freedom RPG",
-      "set": "4th Of July 2023",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/0a895d1e0_Screenshot2026-03-25at52338PM.png"
-    },
-    {
-      "name": "Pumpkin RPG",
-      "set": "Halloween 2023",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1319f13a4_Screenshot2026-04-02at112843PM.png"
-    },
-    {
-      "name": "Skin Melter Double Barrel",
-      "set": "Halloween 2023",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1e59794ad_Screenshot2026-04-01at104212PM.png"
-    },
-    {
-      "name": "Skin Melter Mossberg",
-      "set": "Halloween 2023",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c37807125_Screenshot2026-04-02at112848PM.png"
-    },
-    {
-      "name": "RPG",
-      "set": "Gift Wrappeds",
-      "url": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/810e6edfd_Screenshot2026-03-31at54452PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Gift Wrappeds",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/5b23f5572_Screenshot2026-03-07at94809PM.png"
-    },
-    {
-      "name": "Ak",
-      "set": "Gift Wrappeds",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/392359539_Screenshot2026-03-07at94821PM.png"
-    },
-    {
-      "name": "Aug",
-      "set": "Solid Gold Tacticals V1",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/fd8e715df_Screenshot2026-03-07at95201PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Christmas Futures",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/7e51466d6_Screenshot2026-03-07at94946PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Golden Snows",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/56919ea21_Screenshot2026-03-08at115542PM.png"
-    },
-    {
-      "name": "Scar",
-      "set": "Hearts",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/29b8da54f_Screenshot2026-03-07at95432PM.png"
-    },
-    {
-      "name": "Val",
-      "set": "Hearts",
-      "url": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/a39a5e158_Screenshot2026-03-07at95428PM.png"
-    }
-  ],
+  "images": 224,
   "items": [
     {
       "id": "item-498",
@@ -1148,7 +145,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Admin Ruby skins"
     },
@@ -1172,7 +169,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Admin Ruby skins"
     },
@@ -1352,7 +349,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -1388,7 +385,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -1550,7 +547,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Rewards",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Rewards"
     },
@@ -1661,7 +658,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/e3694387c_Screenshot2026-04-02at113028PM.png",
       "confidence": "Imported source",
       "artKey": "AS VAL",
       "sourceCategory": "Weapon Skin",
@@ -1685,7 +682,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/bf8b62e72_Screenshot2026-03-07at95332PM.png",
       "confidence": "Imported source",
       "artKey": "RIFLE",
       "sourceCategory": "Weapon Skin",
@@ -1709,7 +706,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/8b1c62ce8_Screenshot2026-03-07at95335PM.png",
       "confidence": "Imported source",
       "artKey": "M4A1",
       "sourceCategory": "Weapon Skin",
@@ -1733,7 +730,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/7918c8514_Screenshot2026-03-07at95323PM.png",
       "confidence": "Imported source",
       "artKey": "RPG",
       "sourceCategory": "Weapon Skin",
@@ -2881,7 +1878,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "confidence": "Imported source",
       "artKey": "RIFLE",
       "sourceCategory": "Weapon Skin",
@@ -3142,7 +2139,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "",
+      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/7e51466d6_Screenshot2026-03-07at94946PM.png",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -4710,7 +3707,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -5273,7 +4270,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Rewards",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Rewards"
     },
@@ -5312,7 +4309,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png",
+      "imageUrl": "",
       "confidence": "Imported source",
       "artKey": "RIFLE",
       "sourceCategory": "Weapon Skin",
@@ -5992,7 +4989,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/79915661a_Screenshot2026-03-31at54447PM.png",
       "confidence": "Imported source",
       "artKey": "RPG",
       "sourceCategory": "Weapon Skin",
@@ -6037,7 +5034,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -6131,7 +5128,7 @@
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
       "confidence": "Confirmed Discord",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "artKey": "AK-47",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -6466,7 +5463,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/cc0aaa121_Screenshot2026-04-01at105751PM.png",
       "section": "Weapon Skins",
       "subcategory": "Frozen Gold"
     },
@@ -6986,7 +5983,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -8010,7 +7007,7 @@
       "confidence": "Estimated — unconfirmed",
       "active": "Yes",
       "notes": "This row is included so the set is searchable and usable. Price is an estimate, not a confirmed official value. Recovered from the older Ohio Trade Lab catalog.",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png",
+      "imageUrl": "",
       "artKey": "Saiga 12",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -8180,7 +7177,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/910e2aadb_Screenshot2026-04-02at113903PM.png",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -8198,7 +7195,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/772cf0eb3_Screenshot2026-04-02at113915PM.png",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -8216,7 +7213,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/cb43046f2_Screenshot2026-04-02at112750PM.png",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -8690,7 +7687,7 @@
       "confidence": "Estimated — unconfirmed",
       "active": "Yes",
       "notes": "This row is included so the set is searchable and usable. Price is an estimate, not a confirmed official value. Recovered from the older Ohio Trade Lab catalog.",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png",
+      "imageUrl": "",
       "artKey": "Saiga 12",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -9022,7 +8019,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Mythic",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Mythic"
     },
@@ -9202,7 +8199,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Mythic",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Mythic"
     },
@@ -9598,7 +8595,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -9616,7 +8613,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -9670,7 +8667,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -9818,7 +8815,7 @@
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
       "confidence": "Confirmed Discord",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "artKey": "AK-47",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -9934,7 +8931,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -10024,7 +9021,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/e4b7dca61_Screenshot2026-03-07at92143PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -10114,7 +9111,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -10375,7 +9372,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/7fc01cd80_Screenshot2026-03-07at95328PM.png",
       "confidence": "Imported source",
       "artKey": "RIFLE",
       "sourceCategory": "Weapon Skin",
@@ -10399,7 +9396,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/84085fa99_Screenshot2026-04-01at104404PM.png",
       "confidence": "Imported source",
       "artKey": "M4A1",
       "sourceCategory": "Weapon Skin",
@@ -10666,7 +9663,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -10774,7 +9771,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -10846,7 +9843,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -11402,7 +10399,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -12270,7 +11267,7 @@
       "confidence": "Estimated — unconfirmed",
       "active": "Yes",
       "notes": "This row is included so the set is searchable and usable. Price is an estimate, not a confirmed official value. Recovered from the older Ohio Trade Lab catalog.",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png",
+      "imageUrl": "",
       "artKey": "Saiga 12",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -12678,7 +11675,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/e4b7dca61_Screenshot2026-03-07at92143PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -12696,7 +11693,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -12784,7 +11781,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -12890,7 +11887,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Rewards",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Rewards"
     },
@@ -12948,7 +11945,7 @@
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
       "confidence": "Imported directly from the uploaded Excel master database",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png",
+      "imageUrl": "",
       "artKey": "RIFLE",
       "baseName": "Saiga 12",
       "originalValue": "45K",
@@ -13738,7 +12735,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Rewards",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Rewards"
     },
@@ -13954,7 +12951,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -14116,7 +13113,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/08f7a2653_Screenshot2026-04-02at113937PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -14172,7 +13169,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Solid Gold"
     },
@@ -14226,7 +13223,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/40c0e0385_Screenshot2026-04-02at114025PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -14497,7 +13494,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -14803,7 +13800,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -14951,7 +13948,7 @@
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
       "confidence": "Confirmed Discord",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/988108650_Screenshot2026-03-25at52318PM.png",
+      "imageUrl": "",
       "artKey": "DEAGLE",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -14975,7 +13972,7 @@
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
       "confidence": "Confirmed Discord",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/a1cb4d0e9_Screenshot2026-03-25at52443PM.png",
+      "imageUrl": "",
       "artKey": "TOMMY GUN",
       "sourceCategory": "Weapon Skin",
       "section": "Weapon Skins",
@@ -15510,7 +14507,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -15734,7 +14731,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Tactical"
     },
@@ -16080,7 +15077,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Rewards",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Rewards"
     },
@@ -16286,7 +15283,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Toy"
     },
@@ -16525,7 +15522,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Cases",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/2049bfb53_Screenshot2026-04-02at112843PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Cases"
     },
@@ -16872,7 +15869,7 @@
       "active": "Yes",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "sourceCategory": "Weapon Skin",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ab9252441_Screenshot2026-04-02at114011PM.png",
       "section": "Weapon Skins",
       "subcategory": "Void"
     },
@@ -17276,7 +16273,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/c184fb1af_Screenshot2026-04-02at113848PM.png",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -17372,7 +16369,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Special Sets",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/f05e5805e_Screenshot2026-04-02at113843PM.png",
       "section": "Weapon Skins",
       "subcategory": "Special Sets"
     },
@@ -18228,7 +17225,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/d8190f7b4_Screenshot2026-04-01at104409PM.png",
       "confidence": "Imported source",
       "artKey": "M4A1",
       "sourceCategory": "Weapon Skin",
@@ -18252,7 +17249,7 @@
       "sourceUrl": "https://robloxohio.fandom.com/wiki/Ohio_Values_%26_Demand",
       "notes": "Recovered from the older Ohio Trade Lab catalog.",
       "active": "Yes",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/ed75e4752_Screenshot2026-03-31at54441PM.png",
       "confidence": "Imported source",
       "artKey": "RPG",
       "sourceCategory": "Weapon Skin",
@@ -18315,7 +17312,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Event Rewards",
-      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/9de7c65e6_Screenshot2026-04-01at95621PM.png",
+      "imageUrl": "",
       "section": "Weapon Skins",
       "subcategory": "Event Rewards"
     },
@@ -18899,7 +17896,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/1feb13f66_Screenshot2026-04-02at112958PM.png",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -18917,7 +17914,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "",
+      "imageUrl": "https://media.base44.com/images/public/6976b6fcb5ff37d6f7b6d63d/94df7975d_Screenshot2026-04-02at112952PM.png",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
@@ -18953,7 +17950,7 @@
       "confidence": "Official sheet",
       "verified": true,
       "sourceCategory": "Skin Packs",
-      "imageUrl": "",
+      "imageUrl": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6976b6fcb5ff37d6f7b6d63d/eba38d52f_Screenshot2026-03-07at94933PM.png",
       "section": "Weapon Skins",
       "subcategory": "Skin Packs"
     },
