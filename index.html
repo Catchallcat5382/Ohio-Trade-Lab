@@ -227,6 +227,10 @@ input:focus,select:focus{border-color:#824fc0}
           <option value="over">Smallest overpay</option>
           <option value="demand">Value + demand balance</option>
         </select>
+        <select id="matchSource">
+          <option value="database">Use the full database</option>
+          <option value="inventory">Use only my inventory</option>
+        </select>
         <select id="matchCount">
           <option value="1">Up to 1 item</option>
           <option value="2">Up to 2 items</option>
@@ -677,6 +681,16 @@ function resolveMatchSides(){
  // When both sides contain items, fill the lower-valued side to match the higher one.
  return yours<=theirs?{fill:"yours",target:"theirs"}:{fill:"theirs",target:"yours"};
 }
+function inventoryMatchPool(){
+ const expanded=[];
+ for(const row of inventory){
+   const item=items.find(x=>String(x.id)===String(row.id));
+   const quantity=Math.max(0,Math.floor(Number(row.quantity)||0));
+   if(!item||Number(item.value)<=0||quantity<=0)continue;
+   for(let i=0;i<quantity;i++)expanded.push(item);
+ }
+ return expanded;
+}
 function findBestMatches(){
  const box=$("#matchResults");
  const sides=resolveMatchSides();
@@ -689,10 +703,27 @@ function findBestMatches(){
    return;
  }
  const mode=$("#matchMode").value;
+ const source=$("#matchSource")?.value||"database";
  const maxCount=Math.max(1,Math.min(8,Number($("#matchCount").value)||4));
- const existingFillIds=new Set((trade[sides.fill]||[]).map(x=>String(x.id)));
- let pool=items.filter(x=>!existingFillIds.has(String(x.id))&&Number(x.value)>0);
- pool=pool.sort((a,b)=>Math.abs(a.value-target)-Math.abs(b.value-target)).slice(0,150);
+ let pool;
+ let sourceNotice="";
+ if(source==="inventory"){
+   pool=inventoryMatchPool();
+   if(!pool.length){
+     box.innerHTML='<div class="matchEmpty"><b>Your inventory has no valued items.</b><br>Add items to My Inventory, then try the inventory-only matcher again.</div>';
+     return;
+   }
+   const availableValue=totalOf(pool);
+   if(availableValue<target){
+     sourceNotice=`<div class="inventoryMatchNotice warning"><b>Your whole inventory is worth ${money(availableValue)}, below the ${money(target)} target.</b><span>The closest possible offer using what you own is shown below.</span></div>`;
+   }else{
+     sourceNotice=`<div class="inventoryMatchNotice"><b>Inventory-only mode</b><span>Suggestions respect the quantities saved in your inventory.</span></div>`;
+   }
+ }else{
+   const existingFillIds=new Set((trade[sides.fill]||[]).map(x=>String(x.id)));
+   pool=items.filter(x=>!existingFillIds.has(String(x.id))&&Number(x.value)>0);
+ }
+ pool=pool.sort((a,b)=>Math.abs(a.value-target)-Math.abs(b.value-target)).slice(0,source==="inventory"?240:150);
  const results=[],seen=new Set();
  const push=combo=>{
    const key=combinationKey(combo);
@@ -701,20 +732,19 @@ function findBestMatches(){
    const score=candidateScore(combo,target,targetDemand,mode);
    if(Number.isFinite(score))results.push({combo,score,value:totalOf(combo),demand:demandOf(combo)});
  };
- // Beam search keeps matching responsive while supporting the game maximum of eight slots.
- let beam=[[]];
- const beamWidth=260;
+ // Beam search supports up to eight slots and repeated inventory items up to owned quantity.
+ let beam=[{combo:[],nextIndex:0}];
+ const beamWidth=320;
  for(let depth=1;depth<=maxCount;depth++){
    const next=[];
-   for(const combo of beam){
-     const startIndex=combo.length?pool.indexOf(combo[combo.length-1])+1:0;
-     for(let i=startIndex;i<pool.length;i++){
-       const candidate=combo.concat(pool[i]);
+   for(const state of beam){
+     for(let i=state.nextIndex;i<pool.length;i++){
+       const candidate=state.combo.concat(pool[i]);
        push(candidate);
-       next.push(candidate);
+       next.push({combo:candidate,nextIndex:i+1});
      }
    }
-   next.sort((a,b)=>candidateScore(a,target,targetDemand,mode)-candidateScore(b,target,targetDemand,mode));
+   next.sort((a,b)=>candidateScore(a.combo,target,targetDemand,mode)-candidateScore(b.combo,target,targetDemand,mode));
    beam=next.slice(0,beamWidth);
    if(!beam.length)break;
  }
@@ -722,16 +752,17 @@ function findBestMatches(){
  const best=results.slice(0,8);
  const fillLabel=sides.fill==="yours"?"Your Offer":"Their Offer";
  const targetLabel=sides.target==="yours"?"Your Offer":"Their Offer";
- box.innerHTML=best.map((r,index)=>{
+ const cards=best.map((r,index)=>{
    const diff=r.value-target;
    const label=diff===0?"Exact match":diff>0?`${money(diff)} over`:`${money(Math.abs(diff))} under`;
    return `<div class="matchResult">
     <div class="matchRank">#${index+1}</div>
-    <div class="matchNames"><small>For ${fillLabel} · matching ${targetLabel}</small><div class="matchVisualGrid">${r.combo.map(x=>`<div class="matchVisualTile ${rarityClass(x.rarity)}"><div class="matchVisualArt">${artImg(x)}</div><span title="${esc(x.name)}">${esc(x.name)}</span><b>${money(x.value)}</b></div>`).join("")}</div></div>
+    <div class="matchNames"><small>For ${fillLabel} · matching ${targetLabel}${source==="inventory"?" · from your inventory":""}</small><div class="matchVisualGrid">${r.combo.map(x=>`<div class="matchVisualTile ${rarityClass(x.rarity)}"><div class="matchVisualArt">${artImg(x)}</div><span title="${esc(x.name)}">${esc(x.name)}</span><b>${money(x.value)}</b></div>`).join("")}</div></div>
     <div class="matchNumbers"><b>${money(r.value)}</b><small>${label} · Demand ${r.demand.toFixed(1).replace(".0","")}</small></div>
     <button onclick='useMatch(${JSON.stringify(r.combo.map(x=>x.id))},${JSON.stringify(sides.fill)})'>USE FOR ${fillLabel.toUpperCase()}</button>
    </div>`
- }).join("")||'<div class="matchEmpty">No valid matches were found for that mode.</div>';
+ }).join("");
+ box.innerHTML=sourceNotice+(cards||'<div class="matchEmpty">No valid matches were found for that mode. Try Closest total value or allow more slots.</div>');
 }
 function useMatch(ids,fillSide){
  const side=fillSide==="yours"?"yours":"theirs";
@@ -856,6 +887,7 @@ if(document.readyState==="loading"){
 .matchNumbers{text-align:right;display:grid}.matchNumbers b{font-size:11px;color:#65c6ff}.matchNumbers small{font-size:9px;color:#91a0b8}
 .matchResult button{grid-column:1/-1;border:1px solid #166da9;background:#0c4169;color:white;border-radius:5px;padding:4px;font-size:10px;font-weight:800;cursor:pointer}
 .matchEmpty{padding:10px;text-align:center;color:#8191aa;font-size:10px}
+.inventoryMatchNotice{display:grid;gap:3px;padding:9px;border:1px solid #2f6f56;background:#0b211a;border-radius:7px;color:#bfffe1;font-size:10px}.inventoryMatchNotice span{color:#91b7aa}.inventoryMatchNotice.warning{border-color:#8a6528;background:#261b08;color:#ffe0a0}.inventoryMatchNotice.warning span{color:#d6b97c}
 .cardArt{background:
  radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 64%),
  linear-gradient(145deg,#0b1321,#03060d)!important}

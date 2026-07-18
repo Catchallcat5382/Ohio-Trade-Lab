@@ -26,3 +26,9 @@ Without those deployment steps, Online Hub uses browser-local demo data. A stati
 
 ## Safety and privacy
 The included filter blocks common shortened/invite links, password/login-code requests, and unsafe account-information requests. Display names, Roblox usernames, item names, gun names, and normal trade descriptions are allowed. This is a basic starter filter, not a substitute for moderation, account authentication, reporting, rate limits, or production security review.
+
+## V34 inventory-only value matcher
+- Added a matcher source selector: full database or only items saved in My Inventory.
+- Inventory-only suggestions respect owned quantities and the eight-slot trade limit.
+- When the inventory cannot reach the target, the matcher clearly reports that and still shows the closest possible offers.
+- Empty or valueless inventories now receive a clear message instead of returning misleading suggestions.
