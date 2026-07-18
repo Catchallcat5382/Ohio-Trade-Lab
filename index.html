@@ -211,9 +211,14 @@ input:focus,select:focus{border-color:#824fc0}
     <div class="judgeCard"><div class="verdict" id="verdict">FAIR</div><div class="judgeLabel">Value Difference</div><div class="judgeValue" id="difference">0</div><div class="judgeLabel">Demand Difference</div><div class="judgeValue" id="demandDifference">0/10</div></div>
     <button class="clear" onclick="clearTrade()">▱ CLEAR TRADE</button>
     <div class="matchBox">
-      <div class="matchTitle">BEST MATCHES FOR YOUR OFFER</div>
-      <div class="matchHint">Find the closest single item or item combination for Their Offer.</div>
+      <div class="matchTitle">VALUE MATCHER</div>
+      <div class="matchHint">Choose which offer you want to fill. The matcher uses the opposite offer as the target.</div>
       <div class="matchControls">
+        <select id="matchFillSide">
+          <option value="auto">Auto-detect side to fill</option>
+          <option value="yours">Fill Your Offer to match Their Offer</option>
+          <option value="theirs">Fill Their Offer to match Your Offer</option>
+        </select>
         <select id="matchMode">
           <option value="closest">Closest total value</option>
           <option value="under">Closest without overpay</option>
@@ -227,7 +232,15 @@ input:focus,select:focus{border-color:#824fc0}
         </select>
         <button id="findMatchesBtn" type="button">FIND MATCHES</button>
       </div>
-      <div id="matchResults" class="matchResults"><div class="matchEmpty">Add something to Your Offer, then press Find Matches.</div></div>
+      <div id="matchResults" class="matchResults"><div class="matchEmpty">Add items to either offer, then press Find Matches to build the opposite side.</div></div>
+    </div>
+    <div class="valueWatch" id="valueWatch">
+      <div class="valueWatchTitle">OFFER VALUE WATCH</div>
+      <div class="valueWatchRow"><span>Your Offer</span><b id="watchYourValue">$0</b></div>
+      <div class="valueWatchBar"><i id="watchYourBar"></i></div>
+      <div class="valueWatchRow"><span>Their Offer</span><b id="watchTheirValue">$0</b></div>
+      <div class="valueWatchBar theirsBar"><i id="watchTheirBar"></i></div>
+      <div class="valueWatchDifference" id="watchDifference">Both offers are empty.</div>
     </div>
    </aside>
    <div class="sideCol theirs">
@@ -545,13 +558,24 @@ function renderTrade(){
  if($("#bottomStats")){
    $("#bottomStats").innerHTML=`<span>Your value: <b>${money(yourValue)}</b></span><span>Their value: <b>${money(theirValue)}</b></span><span>Difference: <b>${difference>0?"+":""}${money(difference)}</b></span>`;
  }
+ const watchMax=Math.max(yourValue,theirValue,1);
+ if($("#watchYourValue"))$("#watchYourValue").textContent=money(yourValue);
+ if($("#watchTheirValue"))$("#watchTheirValue").textContent=money(theirValue);
+ if($("#watchYourBar"))$("#watchYourBar").style.width=`${Math.max(0,Math.min(100,yourValue/watchMax*100))}%`;
+ if($("#watchTheirBar"))$("#watchTheirBar").style.width=`${Math.max(0,Math.min(100,theirValue/watchMax*100))}%`;
+ if($("#watchDifference")){
+   if(!yourValue&&!theirValue)$("#watchDifference").textContent="Both offers are empty.";
+   else if(difference===0)$("#watchDifference").textContent="Values are exactly matched.";
+   else if(difference>0)$("#watchDifference").textContent=`Their Offer is ${money(difference)} higher.`;
+   else $("#watchDifference").textContent=`Your Offer is ${money(Math.abs(difference))} higher.`;
+ }
 }
 function clearTrade(){
  trade={yours:[],theirs:[]};
  save();
  renderTrade();
  const results=$("#matchResults");
- if(results)results.innerHTML='<div class="matchEmpty">Add something to Your Offer, then press Find Matches.</div>';
+ if(results)results.innerHTML='<div class="matchEmpty">Add items to either offer, then press Find Matches to build the opposite side.</div>';
 }
 
 function miniCard(x,side){return `<article class="itemCard"><div class="cardArt" data-weapon-class="${weaponClass(x)}" style="--accent:${color(x.set)};--glow:${color(x.set)}55;color:${color(x.set)}">${artImg(x)}</div><div class="cardBody"><div class="cardName" title="${esc(x.name)}">${esc(x.name)}</div><div class="cardRarity ${rarityClass(x.rarity)}">${esc(x.rarity)}</div><div class="cardValue">${money(x.value)}</div><div class="cardDemand">Demand: ${dtext(x)}</div><div class="cardButtons"><button class="addCard" onclick="add('${side}','${esc(x.id)}')">ADD TO ${side==="yours"?"YOURS":"THEIRS"}</button><button class="inventoryAdd" onclick="inventoryAdd('${esc(x.id)}')">+ INVENTORY</button></div></div></article>`}
@@ -621,16 +645,31 @@ function candidateScore(combo,target,targetDemand,mode){
  if(mode==="demand")score+=Math.abs(demand-targetDemand)*Math.max(1000,target*.025);
  return score
 }
+function resolveMatchSides(){
+ const requested=$("#matchFillSide")?.value||"auto";
+ if(requested==="yours")return {fill:"yours",target:"theirs"};
+ if(requested==="theirs")return {fill:"theirs",target:"yours"};
+ const yours=tradeTotal("yours"),theirs=tradeTotal("theirs");
+ if(yours>0&&theirs===0)return {fill:"theirs",target:"yours"};
+ if(theirs>0&&yours===0)return {fill:"yours",target:"theirs"};
+ // When both sides contain items, fill the lower-valued side to match the higher one.
+ return yours<=theirs?{fill:"yours",target:"theirs"}:{fill:"theirs",target:"yours"};
+}
 function findBestMatches(){
  const box=$("#matchResults");
- const target=totalOf(trade.yours);
- const targetDemand=demandOf(trade.yours);
- if(!target){box.innerHTML='<div class="matchEmpty">Add at least one item to Your Offer first.</div>';return}
+ const sides=resolveMatchSides();
+ const targetList=trade[sides.target]||[];
+ const target=totalOf(targetList);
+ const targetDemand=demandOf(targetList);
+ if(!target){
+   const targetName=sides.target==="yours"?"Your Offer":"Their Offer";
+   box.innerHTML=`<div class="matchEmpty">Add at least one valued item to ${targetName}. The matcher will build the opposite offer.</div>`;
+   return;
+ }
  const mode=$("#matchMode").value;
  const maxCount=Math.max(1,Math.min(3,Number($("#matchCount").value)||2));
- const already=new Set(trade.theirs.map(x=>x.id));
- let pool=items.filter(x=>!already.has(x.id)&&x.value>0);
- // Keep the search fast while still considering entries near the target and high-value options.
+ const existingFillIds=new Set((trade[sides.fill]||[]).map(x=>String(x.id)));
+ let pool=items.filter(x=>!existingFillIds.has(String(x.id))&&Number(x.value)>0);
  pool=pool.sort((a,b)=>Math.abs(a.value-target)-Math.abs(b.value-target)).slice(0,150);
  const results=[],seen=new Set();
  const push=combo=>{
@@ -641,32 +680,34 @@ function findBestMatches(){
    if(Number.isFinite(score))results.push({combo,score,value:totalOf(combo),demand:demandOf(combo)});
  };
  for(let i=0;i<pool.length;i++)push([pool[i]]);
- if(maxCount>=2){
-   for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++)push([pool[i],pool[j]]);
- }
+ if(maxCount>=2){for(let i=0;i<pool.length;i++)for(let j=i+1;j<pool.length;j++)push([pool[i],pool[j]])}
  if(maxCount>=3){
    const small=pool.slice(0,55);
    for(let i=0;i<small.length;i++)for(let j=i+1;j<small.length;j++)for(let k=j+1;k<small.length;k++)push([small[i],small[j],small[k]]);
  }
  results.sort((a,b)=>a.score-b.score||Math.abs(a.value-target)-Math.abs(b.value-target));
  const best=results.slice(0,8);
+ const fillLabel=sides.fill==="yours"?"Your Offer":"Their Offer";
+ const targetLabel=sides.target==="yours"?"Your Offer":"Their Offer";
  box.innerHTML=best.map((r,index)=>{
    const diff=r.value-target;
    const label=diff===0?"Exact match":diff>0?`${money(diff)} over`:`${money(Math.abs(diff))} under`;
    return `<div class="matchResult">
     <div class="matchRank">#${index+1}</div>
-    <div class="matchNames">${r.combo.map(x=>`<span>${esc(x.name)}</span>`).join("")}</div>
+    <div class="matchNames"><small>For ${fillLabel} · matching ${targetLabel}</small>${r.combo.map(x=>`<span>${esc(x.name)}</span>`).join("")}</div>
     <div class="matchNumbers"><b>${money(r.value)}</b><small>${label} · Demand ${r.demand.toFixed(1).replace(".0","")}</small></div>
-    <button onclick='useMatch(${JSON.stringify(r.combo.map(x=>x.id))})'>USE</button>
+    <button onclick='useMatch(${JSON.stringify(r.combo.map(x=>x.id))},${JSON.stringify(sides.fill)})'>USE FOR ${fillLabel.toUpperCase()}</button>
    </div>`
  }).join("")||'<div class="matchEmpty">No valid matches were found for that mode.</div>';
 }
-function useMatch(ids){
- trade.theirs=ids.map(id=>items.find(x=>x.id===id)).filter(Boolean);
+function useMatch(ids,fillSide){
+ const side=fillSide==="yours"?"yours":"theirs";
+ trade[side]=ids.map(id=>items.find(x=>String(x.id)===String(id))).filter(Boolean);
  save();
  renderTrade();
- $("#status").textContent="The suggested match was added to Their Offer.";
+ $("#status").textContent=`The suggested match was added to ${side==="yours"?"Your Offer":"Their Offer"}.`;
 }
+
 
 
 const INVENTORY_KEY="ohioTradeLabInventoryV1";
@@ -1061,5 +1102,16 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
 }
 </style>
 
+
+<style id="v31-two-way-matcher-watch">
+.valueWatch{margin-top:12px;border:1px solid #334a6d;border-radius:10px;padding:10px;background:linear-gradient(180deg,#0b1424,#070c16);position:sticky;top:12px}
+.valueWatchTitle{text-align:center;font-size:11px;font-weight:950;letter-spacing:.7px;color:#6fd2ff;margin-bottom:9px}
+.valueWatchRow{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:#9caac0;margin:6px 0 3px}.valueWatchRow b{font-size:12px;color:#eef6ff}
+.valueWatchBar{height:7px;border-radius:999px;background:#111c2d;overflow:hidden;border:1px solid #243752}.valueWatchBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7034a0,#cf6cff);transition:width .22s ease}
+.valueWatchBar.theirsBar i{background:linear-gradient(90deg,#155d90,#55c2ff)}
+.valueWatchDifference{text-align:center;margin-top:9px;padding-top:8px;border-top:1px solid #21334d;font-size:10px;font-weight:800;color:#d8e6f8}
+.matchNames small{font-size:8px;color:#71839d;margin-bottom:2px}
+@media(max-width:1000px){.valueWatch{position:static}}
+</style>
 </body>
 </html>

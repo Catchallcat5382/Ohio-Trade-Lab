@@ -1,10 +1,8 @@
-# Ohio Trade Lab V30
+# Ohio Trade Lab V31
 
-Game-style trade layout update:
-
-- Larger space around both offers.
-- Added items appear as image tiles similar to the in-game trade window.
-- Every copy of an item is visible as its own tile.
-- Every item has its own red remove button.
-- Responsive 4/3/2-column offer grids.
-- Fixed packaged logo path.
+## Fixes in this build
+- Two-way value matching: build Your Offer from Their Offer or build Their Offer from Your Offer.
+- Auto-detect mode chooses the empty/lower-valued side automatically.
+- You no longer need an item in Your Offer specifically before using Best Matches.
+- Persistent Offer Value Watch shows both totals, live comparison bars, and the exact difference.
+- Match results clearly state which side they will replace before you press Use.
