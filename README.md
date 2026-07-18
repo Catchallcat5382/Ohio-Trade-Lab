@@ -1,3 +1,10 @@
-# Ohio Trade Lab V29 — Exact Image Matching Fix
+# Ohio Trade Lab V30
 
-This build validates images using both the skin set and the weapon/item name. It no longer copies one gun image across unrelated sets. For example, the Void Riot Shield image is used only for Void Riot Shield entries, and the Void Saiga 12 image is not reused for Emerald, Ruby, Halloween, Holy, Reaper, or Solid Gold Saiga 12 entries. Entries without a confirmed exact image are intentionally left blank rather than showing the wrong image.
+Game-style trade layout update:
+
+- Larger space around both offers.
+- Added items appear as image tiles similar to the in-game trade window.
+- Every copy of an item is visible as its own tile.
+- Every item has its own red remove button.
+- Responsive 4/3/2-column offer grids.
+- Fixed packaged logo path.

@@ -166,7 +166,7 @@ input:focus,select:focus{border-color:#824fc0}
 <body>
 <div class="app">
 <aside class="sidebar">
- <div class="logo"><img src="assets/ohio-trade-lab-logo.png" alt="Ohio Trade Lab"></div>
+ <div class="logo"><img src="ohio-trade-lab-logo.png" alt="Ohio Trade Lab"></div>
  <div class="sideNav">
   <button class="navBtn active" data-page="trade"><span class="ico">⇄</span>TRADE</button>
   <button class="navBtn" data-page="skins"><span class="ico">▰</span>SKINS</button>
@@ -501,14 +501,15 @@ function removeTradeItem(side,index){
  renderTrade();
 }
 function tradeItemCard(item,side,index){
- return `<article class="tradeItem">
+ const rarity=rarityClass(item.rarity);
+ return `<article class="tradeItem tradeTile ${rarity}" title="${esc(item.name)}">
    <div class="tradeThumb" data-weapon-class="${weaponClass(item)}" style="--accent:${color(item.set)};--glow:${color(item.set)}55">${artImg(item)}</div>
    <div class="tradeItemInfo">
-     <div class="tradeItemName" title="${esc(item.name)}">${esc(item.name)}</div>
+     <div class="tradeItemName">${esc(item.name)}</div>
      <div class="tradeItemSub">${esc(item.set)}${item.weapon?` · ${esc(item.weapon)}`:""}</div>
      <div class="tradeItemValue">${money(item.value)}</div>
    </div>
-   <button class="removeTrade" type="button" onclick="removeTradeItem('${side}',${index})" title="Remove item">×</button>
+   <button class="removeTrade" type="button" onclick="removeTradeItem('${side}',${index})" aria-label="Remove ${esc(item.name)}" title="Remove this item">×</button>
  </article>`;
 }
 function renderTrade(){
@@ -951,6 +952,113 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  .toolbar{grid-template-columns:1fr!important}
 }
 @media(max-width:420px){.cardsAll,.cardScroller{grid-template-columns:1fr!important}.cardArt{height:150px!important;min-height:150px!important;max-height:150px!important}}
+</style>
+
+
+<style id="v30-game-style-trade-area">
+/* Larger, game-style offer area. Every added copy is its own removable tile. */
+.tradeGrid{
+  grid-template-columns:minmax(390px,1fr) 188px minmax(390px,1fr)!important;
+  gap:22px!important;
+  margin:18px auto 0!important;
+  max-width:1680px;
+  align-items:start;
+}
+.sideCol{min-width:0;padding:4px}
+.offer{
+  height:auto!important;
+  min-height:430px!important;
+  padding:15px!important;
+  border-radius:14px!important;
+}
+.offerHead{padding:2px 4px 12px}
+.offerHead h2{font-size:20px!important;letter-spacing:.04em}
+.offerMeta{font-size:13px}
+.drop{
+  height:auto!important;
+  min-height:330px!important;
+  max-height:520px!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-content:start!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:10px!important;
+  border-radius:11px!important;
+}
+.emptyOffer{grid-column:1/-1;min-height:300px!important;font-size:13px!important}
+.tradeItem.tradeTile{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important;
+  min-width:0!important;
+  min-height:174px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:2px solid #354967!important;
+  border-radius:9px!important;
+  background:linear-gradient(180deg,#111a2b,#080d17)!important;
+  box-shadow:0 7px 18px #0006!important;
+}
+.yours .tradeItem.tradeTile{border-color:#8748a8!important}
+.theirs .tradeItem.tradeTile{border-color:#287db6!important}
+.tradeItem.tradeTile.mythic{box-shadow:inset 0 0 20px #ff43b51c,0 7px 18px #0006!important}
+.tradeItem.tradeTile.legendary{box-shadow:inset 0 0 20px #ff9d1d1c,0 7px 18px #0006!important}
+.tradeItem.tradeTile.epic{box-shadow:inset 0 0 20px #a55cff1c,0 7px 18px #0006!important}
+.tradeItem.tradeTile.rare{box-shadow:inset 0 0 20px #278cff1c,0 7px 18px #0006!important}
+.tradeTile .tradeThumb{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:104px!important;
+  min-height:104px!important;
+  padding:7px!important;
+  border-radius:0!important;
+  border-bottom:1px solid #263b59!important;
+  background:radial-gradient(circle at 50% 68%,var(--glow),transparent 66%),#060b14!important;
+}
+.tradeTile .tradeThumb>img{
+  width:100%!important;height:100%!important;object-fit:contain!important;
+  object-position:center!important;padding:0!important;display:block!important;
+  filter:drop-shadow(0 5px 7px #000b)!important;
+}
+.tradeTile .tradeItemInfo{padding:7px 8px 8px!important;min-width:0!important;flex:1}
+.tradeTile .tradeItemName{
+  font-size:12px!important;line-height:1.2!important;font-weight:950!important;
+  white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden!important;min-height:29px;
+}
+.tradeTile .tradeItemSub{font-size:9px!important;margin-top:3px!important}
+.tradeTile .tradeItemValue{font-size:12px!important;margin-top:4px!important}
+.tradeTile .removeTrade{
+  position:absolute!important;top:5px!important;right:5px!important;z-index:4!important;
+  width:27px!important;height:27px!important;border-radius:6px!important;
+  border:1px solid #ff6579!important;background:#8d1429e8!important;color:#fff!important;
+  font-size:20px!important;line-height:22px!important;font-weight:900!important;
+  box-shadow:0 3px 9px #0009!important;
+}
+.tradeTile .removeTrade:hover{background:#e72f4d!important;transform:scale(1.06)}
+.judge{top:14px!important}.judgeCard{height:auto!important;min-height:230px!important;padding:18px 10px!important}
+.selector{margin-top:16px!important}
+@media(max-width:1450px){
+ .tradeGrid{grid-template-columns:minmax(340px,1fr) 174px minmax(340px,1fr)!important;gap:14px!important}
+ .drop{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:1050px){
+ .tradeGrid{grid-template-columns:1fr!important;max-width:850px!important}
+ .judge{position:static!important;order:-1!important}
+ .offer{min-height:390px!important}.drop{min-height:290px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+ .tradeGrid{gap:14px!important}.offer{padding:10px!important;min-height:360px!important}
+ .drop{grid-template-columns:repeat(3,minmax(0,1fr))!important;min-height:260px!important;padding:7px!important;gap:7px!important}
+ .tradeItem.tradeTile{min-height:155px!important}.tradeTile .tradeThumb{height:88px!important;min-height:88px!important}
+}
+@media(max-width:470px){
+ .drop{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
 </style>
 
 </body>
