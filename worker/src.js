@@ -33,7 +33,12 @@ async function finalizeAuctions(env){const now=Date.now();const {results}=await 
 export default {async fetch(req,env){
  if(req.method==="OPTIONS")return json({ok:true});
  const url=new URL(req.url),path=url.pathname.replace(/^\/api/,"");
- if(path==="/health")return json({ok:true});
+ if(path==="/health")return json({ok:true,databaseBound:Boolean(env.DB&&typeof env.DB.prepare==="function")});
+ if(!env.DB||typeof env.DB.prepare!=="function"){
+  const message="Cloudflare D1 database binding is missing. Add a D1 binding named DB to this Pages project, then redeploy.";
+  if(path.startsWith("/auth/google/callback")||path.startsWith("/auth/discord/callback"))return oauthFail(env,url,message);
+  return json({error:"Database not configured",detail:message,requiredBinding:"DB"},503);
+ }
  try{
   if(path==="/auth/config"&&req.method==="GET")return json({googleEnabled:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),discordEnabled:Boolean(env.DISCORD_CLIENT_ID&&env.DISCORD_CLIENT_SECRET),ownerBootstrapConfigured:Boolean(env.OWNER_EMAILS),siteUrl:safeSite(env,url)});
   if(path==="/presence"&&req.method==="POST"){

@@ -1,3 +1,23 @@
+# Ohio Trade Lab V44 — D1 Binding Diagnostics Fix
+
+This build prevents the confusing `Cannot read properties of undefined (reading 'prepare')` crash. That message means Cloudflare did not inject a D1 database as `env.DB`. The site now reports a clear `Database not configured` message and `/api/health` shows whether the binding exists.
+
+## REQUIRED Cloudflare fix
+
+1. Cloudflare Dashboard → Workers & Pages → Ohio Trade Lab.
+2. Settings → Bindings.
+3. Add → D1 database binding.
+4. Variable name: `DB` (uppercase, exactly).
+5. Select or create your Ohio Trade Lab D1 database.
+6. Add the binding to Production. Add it to Preview too if you test preview deployments.
+7. Redeploy after saving.
+8. Open `/api/health`; it must report `"databaseBound": true`.
+9. Apply every SQL file under `worker/migrations` in order to that same D1 database.
+
+Do not create `DB` as a text environment variable. It must be a **D1 database binding**.
+
+---
+
 # Ohio Trade Lab V43 — Redirect OAuth Fix
 
 This build replaces the blocked Google One Tap prompt with the normal Google OAuth account chooser. Google and Discord callbacks are generated from `PUBLIC_SITE_URL`, so the app no longer uses a placeholder domain or a changing preview deployment URL.
