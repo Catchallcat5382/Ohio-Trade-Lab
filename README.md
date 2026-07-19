@@ -1,3 +1,18 @@
+# Ohio Trade Lab V50
+
+V50 fixes the split authentication state that caused the header to show a signed-in user while Account, posting, auctions, and inbox still treated the same browser as logged out.
+
+## Fixes
+- One server-cookie session is used across the whole Online Hub.
+- The original hub state and the newer account header are synchronized.
+- Account opens correctly for authenticated users.
+- Post Trade, Auctions, Inbox, rooms, and action buttons recognize the same signed-in user.
+- Logout clears the server cookie and all legacy browser login state.
+- Sessions use the existing 30-day secure cookie and survive tab/browser closure.
+- Guest browsing remains available for the trade market and auctions.
+
+Keep the Cloudflare D1 binding named `DB` and the existing Production secrets.
+
 # Ohio Trade Lab V48
 
 V48 fixes stale Developer UI state. The server session is now the source of truth, the developer panel always starts closed, logout removes legacy browser login state, and the button is labeled **Open Developer Tools** so having the Developer role is not confused with currently being inside a mode.

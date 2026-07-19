@@ -1328,7 +1328,7 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  window.otlRemoveListing=async id=>{await api('/listings/'+id,{method:'DELETE'});if(API==='/api'){const st=localState();st.listings=st.listings.filter(x=>x.id!==id);saveLocal(st)}loadHub()};
  window.otlConfirmDelivery=async id=>{await api('/listings/'+id+'/confirm-delivery',{method:'POST',body:'{}'});loadHub()}; window.otlRerunAuction=async id=>{await api('/listings/'+id+'/rerun',{method:'POST',body:'{}'});loadHub()};
  function bind(){['hubLoginBtn','hubLockedLogin'].forEach(id=>$(id).onclick=()=>modal('hubAuthModal'));$('hubModalClose').onclick=()=>modal('hubAuthModal',false);$('hubAccountBtn').onclick=()=>{if(!me)return modal('hubAuthModal');notifyState();modal('hubAccountModal')};$('hubAccountClose').onclick=()=>modal('hubAccountModal',false);document.querySelectorAll('.authTab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.authTab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.authPane').forEach(x=>x.classList.toggle('active',x.id.toLowerCase()==='auth'+b.dataset.auth))});$('emailLoginBtn').onclick=()=>loginEmail(false);$('emailRegisterBtn').onclick=()=>loginEmail(true);$('googleLoginBtn').onclick=()=>{location.href='/api/auth/google/start'};$('discordLoginBtn').onclick=()=>{location.href='/api/auth/discord/start'};$('logoutBtn').onclick=async()=>{try{await api('/auth/logout',{method:'POST',body:'{}'})}catch(e){}localStorage.removeItem(TOKEN_KEY);localStorage.removeItem('otl_local_uid');me=null;window.me=null;listings=[];inbox=[];modal('hubAccountModal',false);renderAuth();await loadHub()};$('saveDisplayBtn').onclick=async()=>{if(!me)return modal('hubAuthModal');try{const displayName=clean($('accountDisplay').value,24);const d=await api('/auth/profile',{method:'POST',body:JSON.stringify({displayName})});if(d?.user)me=d.user;else if(API==='/api'){me.displayName=displayName;const st=localState();if(st.users[me.id])st.users[me.id].displayName=displayName;saveLocal(st)}window.me=me;renderAuth();modal('hubAccountModal',false)}catch(e){$('notifyStateAccount').textContent=e.message}};$('notifyBtn').onclick=async()=>{localStorage.removeItem('otl_notifications_disabled');if('Notification'in window&&Notification.permission!=='granted')await Notification.requestPermission();notifyState()};$('disableNotifyBtn').onclick=()=>{localStorage.setItem('otl_notifications_disabled','1');notifyState()};document.querySelectorAll('.onlineTab').forEach(b=>b.onclick=()=>{if(!me&&['create','inbox'].includes(b.dataset.onlineView)){modal('hubAuthModal');$('authMessage').textContent='Sign in to post listings or use private rooms.';return}document.querySelectorAll('.onlineTab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.onlineView').forEach(x=>x.classList.remove('active'));$('online'+b.dataset.onlineView[0].toUpperCase()+b.dataset.onlineView.slice(1)).classList.add('active');renderPreview()});['marketSearch','marketType','marketSection','marketSet','marketRarity','marketMinValue','marketMaxValue','marketSort','marketImagesOnly'].forEach(id=>{$(id).oninput=renderMarket;$(id).onchange=renderMarket});$('clearMarketFilters').onclick=()=>{['marketSearch','marketType','marketSection','marketSet','marketRarity','marketMinValue','marketMaxValue'].forEach(id=>$(id).value='');$('marketImagesOnly').checked=true;renderMarket()};$('refreshMarket').onclick=loadHub;$('postTradeBtn').onclick=()=>postListing('trade');$('postAuctionBtn').onclick=()=>postListing('auction');$('auctionItemSearch').oninput=renderAuctionPicker;$('markInboxRead').onclick=async()=>{await api('/notifications/read',{method:'POST',body:'{}'});inbox=[];renderInbox()};notifyState();fillFilters();renderAuctionPicker();renderPreview()}
- window.loadHub=loadHub;window.renderMarket=renderMarket;window.renderAuctionPicker=renderAuctionPicker;window.localState=localState;window.saveLocal=saveLocal;document.addEventListener('DOMContentLoaded',()=>{bind();restore()});
+ window.loadHub=loadHub;window.renderMarket=renderMarket;window.renderAuctionPicker=renderAuctionPicker;window.localState=localState;window.saveLocal=saveLocal;window.OTL_setSessionUser=async user=>{me=user||null;window.me=me;renderAuth();await loadHub()};window.OTL_getSessionUser=()=>me;document.addEventListener('DOMContentLoaded',()=>{bind();restore()});
 })();
 </script>
 <style id="v38-persistence-developer-fixes">
@@ -1547,62 +1547,78 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
-<style id="v49-auth-hub-authority-fix">
+<style id="v50-auth-session-single-source-fix">
 #hubContent{display:block!important}
 body.hubGuest #hubSignedIn{display:none!important}
 body:not(.hubGuest) #hubSignedOut{display:none!important}
-.sessionRoleBadge{display:inline-flex;align-items:center;padding:3px 8px;border:1px solid #344765;border-radius:999px;color:#9fb2ca;font-size:10px;margin-left:5px}
+#hubLocked{display:none!important}
 </style>
-<script id="v49-auth-hub-authority-fix-script">
+<script id="v50-auth-session-single-source-fix-script">
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
 const API=()=>window.OTL_CONFIG?.apiBase||'/api';
-const LEGACY_KEYS=['otl_session_v37','otl_session_v38','otl_auth_token','auth_token'];
-function clearLegacy(){for(const key of LEGACY_KEYS)localStorage.removeItem(key)}
+const LEGACY_KEYS=['otl_session_v37','otl_session_v38','otl_auth_token','auth_token','otl_local_uid'];
+let syncing=false;
+function clearLegacy(){for(const key of LEGACY_KEYS){try{localStorage.removeItem(key)}catch(_){}}}
 async function getServerUser(){
-  const r=await fetch(API()+'/auth/me',{credentials:'same-origin',cache:'no-store'});
-  if(r.status===401)return null;
+  const r=await fetch(API()+'/auth/me',{credentials:'include',cache:'no-store',headers:{accept:'application/json'}});
   const d=await r.json().catch(()=>({}));
+  if(r.status===401)return null;
   if(!r.ok)throw new Error(d.error||'Could not check login');
   return d.user||null;
 }
-function paint(user){
-  window.me=user||null;
-  document.body.classList.toggle('hubGuest',!user);
-  const out=$('hubSignedOut'),inside=$('hubSignedIn'),content=$('hubContent'),locked=$('hubLocked');
-  if(out)out.hidden=!!user;if(inside)inside.hidden=!user;if(content)content.hidden=false;if(locked)locked.hidden=true;
-  if(user){
-    if($('hubDisplayName'))$('hubDisplayName').textContent=user.displayName||'Trader';
-    if($('hubAccountName'))$('hubAccountName').textContent='@'+(user.username||'user');
-    if($('hubAvatar'))$('hubAvatar').src=user.avatar||'assets/default-avatar.svg';
-    if($('accountUsername'))$('accountUsername').textContent='@'+(user.username||'user');
-    if($('accountDisplay'))$('accountDisplay').value=user.displayName||'';
+async function applyUser(user){
+  if(typeof window.OTL_setSessionUser==='function'){
+    await window.OTL_setSessionUser(user);
+  }else{
+    window.me=user||null;
+    document.body.classList.toggle('hubGuest',!user);
   }
   const note=$('onlineModeNote');
-  if(note)note.textContent=user?'Signed in as @'+(user.username||'user')+'. The Online Hub is unlocked and synced.':'Guest mode: the trade market and auctions remain visible. Sign in only for posting, bidding, rooms, and account tools.';
+  if(note)note.textContent=user
+    ?`Signed in as @${user.username||'user'}. Account, posting, auctions, inbox, and rooms are unlocked.`
+    :'Guest mode: trades and auctions remain visible. Sign in to post, bid, accept trades, use rooms, or manage your account.';
 }
-async function authoritativeRefresh(){
+async function syncSession(){
+  if(syncing)return;
+  syncing=true;
   clearLegacy();
-  try{const user=await getServerUser();paint(user);if(typeof window.loadHub==='function')await window.loadHub()}
-  catch(e){paint(null);const n=$('onlineModeNote');if(n)n.textContent='Guest browsing is available. Login status could not be checked: '+e.message}
+  try{await applyUser(await getServerUser())}
+  catch(e){
+    const note=$('onlineModeNote');
+    if(note)note.textContent='Could not verify the current session: '+e.message;
+  }finally{syncing=false}
 }
-async function forceLogout(){
+async function logout(){
   clearLegacy();
-  try{await fetch(API()+'/auth/logout',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'content-type':'application/json'},body:'{}'})}catch(_){ }
-  localStorage.removeItem('otl_local_uid');
-  paint(null);
-  document.getElementById('hubAccountModal')?.setAttribute('hidden','');
-  await authoritativeRefresh();
+  try{
+    await fetch(API()+'/auth/logout',{method:'POST',credentials:'include',cache:'no-store',headers:{'content-type':'application/json'},body:'{}'});
+  }catch(_){ }
+  await applyUser(null);
+  $('hubAccountModal')?.setAttribute('hidden','');
+  $('developerPanel')?.classList.remove('open');
+  await syncSession();
 }
 function install(){
   clearLegacy();
-  const logout=$('logoutBtn');if(logout)logout.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();forceLogout()},true);
-  const google=$('googleLoginBtn');if(google)google.onclick=()=>{clearLegacy();location.href=API()+'/auth/google/start'};
-  const discord=$('discordLoginBtn');if(discord)discord.onclick=()=>{clearLegacy();location.href=API()+'/auth/discord/start'};
-  window.addEventListener('pageshow',authoritativeRefresh);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)authoritativeRefresh()});
-  authoritativeRefresh();
+  const logoutBtn=$('logoutBtn');
+  if(logoutBtn)logoutBtn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();logout()},true);
+  const accountBtn=$('hubAccountBtn');
+  if(accountBtn)accountBtn.addEventListener('click',async e=>{
+    e.preventDefault();e.stopImmediatePropagation();
+    await syncSession();
+    const user=typeof window.OTL_getSessionUser==='function'?window.OTL_getSessionUser():window.me;
+    if(user){$('hubAccountModal')?.removeAttribute('hidden')}
+    else{$('hubAuthModal')?.removeAttribute('hidden');if($('authMessage'))$('authMessage').textContent='Please sign in first.'}
+  },true);
+  for(const [id,path] of [['googleLoginBtn','/auth/google/start'],['discordLoginBtn','/auth/discord/start']]){
+    const btn=$(id);if(btn)btn.addEventListener('click',e=>{e.preventDefault();clearLegacy();location.href=API()+path},true);
+  }
+  window.addEventListener('pageshow',syncSession);
+  window.addEventListener('focus',syncSession);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncSession()});
+  syncSession();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
