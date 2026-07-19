@@ -1,1 +1,1 @@
-# No SPA redirect is required; index.html is served at the site root.
+# No SPA redirect required: the site is a single root index.html.

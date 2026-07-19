@@ -1,3 +1,49 @@
+# Ohio Trade Lab V45 — OAuth Environment Diagnostics Fix
+
+This build removes the misleading browser-side “not configured” block. Google and Discord buttons now always reach the server, which returns the real configuration result.
+
+## New diagnostic URL
+
+After deploying Production, open:
+
+`https://ohio-trade-lab.pages.dev/api/auth/diagnostics`
+
+It safely returns only variable names and true/false presence flags. It never returns secret values. All four OAuth flags must be true:
+
+- `googleClientId`
+- `googleClientSecret`
+- `discordClientId`
+- `discordClientSecret`
+
+`databaseBound` must also be true.
+
+If the variables appear in the Cloudflare dashboard but their flags are false, they are attached to a different environment/project than the Production deployment. In Cloudflare Pages, add them to the Ohio Trade Lab **Production** environment and create a new production deployment.
+
+## Required Production bindings
+
+Variables or secrets:
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `DISCORD_CLIENT_ID`
+- `DISCORD_CLIENT_SECRET`
+- `PUBLIC_SITE_URL=https://ohio-trade-lab.pages.dev`
+- `SESSION_SECRET`
+- `OWNER_EMAILS`
+
+D1 binding:
+- Variable name: `DB`
+- Database: your created Ohio Trade Lab D1 database
+
+## OAuth callbacks
+
+Google: `https://ohio-trade-lab.pages.dev/api/auth/google/callback`
+
+Discord: `https://ohio-trade-lab.pages.dev/api/auth/discord/callback`
+
+## Security
+
+Client secrets and session secrets remain server-only. The diagnostics endpoint reveals names/presence only.
+
 # Ohio Trade Lab V44 — D1 Binding Diagnostics Fix
 
 This build prevents the confusing `Cannot read properties of undefined (reading 'prepare')` crash. That message means Cloudflare did not inject a D1 database as `env.DB`. The site now reports a clear `Database not configured` message and `/api/health` shows whether the binding exists.

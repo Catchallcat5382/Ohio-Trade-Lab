@@ -1,10 +1,22 @@
 const enc = new TextEncoder();
 const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","cache-control":"no-store","access-control-allow-origin":"*","access-control-allow-headers":"content-type,authorization,x-admin-key","access-control-allow-methods":"GET,POST,DELETE,OPTIONS",...extra}});
+const envText=(env,name)=>String((env&&env[name])??"").trim();
+const hasEnv=(env,name)=>envText(env,name).length>0;
+const oauthStatus=env=>({
+ googleClientId:hasEnv(env,"GOOGLE_CLIENT_ID"),
+ googleClientSecret:hasEnv(env,"GOOGLE_CLIENT_SECRET"),
+ discordClientId:hasEnv(env,"DISCORD_CLIENT_ID"),
+ discordClientSecret:hasEnv(env,"DISCORD_CLIENT_SECRET"),
+ publicSiteUrl:hasEnv(env,"PUBLIC_SITE_URL"),
+ sessionSecret:hasEnv(env,"SESSION_SECRET"),
+ ownerEmails:hasEnv(env,"OWNER_EMAILS"),
+ databaseBound:Boolean(env&&env.DB&&typeof env.DB.prepare==="function")
+});
 const cookieValue=(req,name)=>(req.headers.get("cookie")||"").match(new RegExp("(?:^|;\\s*)"+name+"=([^;]+)"))?.[1]||"";
 const sessionCookie=(token,maxAge=2592000)=>`otl_session=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 const clearSessionCookie=()=>"otl_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
 const safeSite=(env,url)=>{
- const configured=String(env.PUBLIC_SITE_URL||"").trim().replace(/\/$/,"");
+ const configured=envText(env,"PUBLIC_SITE_URL").replace(/\/$/,"");
  if(configured&&!/your[-.]actual[-.]domain/i.test(configured)){try{const u=new URL(configured);if(u.protocol==="https:")return u.origin}catch{}}
  return url.origin;
 };
@@ -33,14 +45,16 @@ async function finalizeAuctions(env){const now=Date.now();const {results}=await 
 export default {async fetch(req,env){
  if(req.method==="OPTIONS")return json({ok:true});
  const url=new URL(req.url),path=url.pathname.replace(/^\/api/,"");
- if(path==="/health")return json({ok:true,databaseBound:Boolean(env.DB&&typeof env.DB.prepare==="function")});
- if(!env.DB||typeof env.DB.prepare!=="function"){
+ const status=oauthStatus(env);
+ if(path==="/health")return json({ok:true,...status});
+ if(path==="/auth/config"&&req.method==="GET")return json({googleEnabled:status.googleClientId&&status.googleClientSecret,discordEnabled:status.discordClientId&&status.discordClientSecret,ownerBootstrapConfigured:status.ownerEmails,siteUrl:safeSite(env,url),databaseBound:status.databaseBound});
+ if(path==="/auth/diagnostics"&&req.method==="GET")return json({ok:true,visibleBindingNames:Object.keys(env||{}).sort(),status,note:"Only names and presence flags are returned; secret values are never exposed."});
+ if(!status.databaseBound){
   const message="Cloudflare D1 database binding is missing. Add a D1 binding named DB to this Pages project, then redeploy.";
   if(path.startsWith("/auth/google/callback")||path.startsWith("/auth/discord/callback"))return oauthFail(env,url,message);
   return json({error:"Database not configured",detail:message,requiredBinding:"DB"},503);
  }
  try{
-  if(path==="/auth/config"&&req.method==="GET")return json({googleEnabled:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),discordEnabled:Boolean(env.DISCORD_CLIENT_ID&&env.DISCORD_CLIENT_SECRET),ownerBootstrapConfigured:Boolean(env.OWNER_EMAILS),siteUrl:safeSite(env,url)});
   if(path==="/presence"&&req.method==="POST"){
    await ensurePresenceTable(env);
    const body=await req.json().catch(()=>({}));const me=await auth(req,env);const visitor=clean(body.visitorId,80)||uid();const kind=me?(me.role==="developer"||me.role==="admin"||me.role==="staff"?"staff":"user"):"guest";
@@ -55,10 +69,11 @@ export default {async fetch(req,env){
   if(path==="/auth/logout"&&req.method==="POST")return json({ok:true},200,{"set-cookie":clearSessionCookie()});
 
   if(path==="/auth/google/start"&&req.method==="GET"){
-   if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)return oauthFail(env,url,"Google sign-in is not configured. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Cloudflare Production variables, then redeploy.");
+   const googleClientId=envText(env,"GOOGLE_CLIENT_ID"),googleClientSecret=envText(env,"GOOGLE_CLIENT_SECRET");
+   if(!googleClientId||!googleClientSecret)return oauthFail(env,url,"This production deployment cannot see GOOGLE_CLIENT_ID and/or GOOGLE_CLIENT_SECRET. Open /api/auth/diagnostics, confirm both flags are true, then redeploy Production.");
    const site=safeSite(env,url),state=uid(),nonce=uid(),redirectUri=`${site}/api/auth/google/callback`;
    const redirect=new URL("https://accounts.google.com/o/oauth2/v2/auth");
-   redirect.searchParams.set("client_id",env.GOOGLE_CLIENT_ID);redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("response_type","code");redirect.searchParams.set("scope","openid email profile");redirect.searchParams.set("state",state);redirect.searchParams.set("nonce",nonce);redirect.searchParams.set("prompt","select_account");redirect.searchParams.set("access_type","online");
+   redirect.searchParams.set("client_id",googleClientId);redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("response_type","code");redirect.searchParams.set("scope","openid email profile");redirect.searchParams.set("state",state);redirect.searchParams.set("nonce",nonce);redirect.searchParams.set("prompt","select_account");redirect.searchParams.set("access_type","online");
    return redirectWithCookies(redirect.toString(),[oauthCookie("otl_google_state",state),oauthCookie("otl_google_nonce",nonce)]);
   }
   if(path==="/auth/google/callback"&&req.method==="GET"){
@@ -66,14 +81,15 @@ export default {async fetch(req,env){
     const site=safeSite(env,url),code=url.searchParams.get("code"),state=url.searchParams.get("state"),savedState=decodeURIComponent(cookieValue(req,"otl_google_state")||""),nonce=decodeURIComponent(cookieValue(req,"otl_google_nonce")||"");
     if(url.searchParams.get("error"))return oauthFail(env,url,"Google sign-in was cancelled.");
     if(!code||!state||!savedState||state!==savedState||!nonce)return oauthFail(env,url,"Google sign-in state expired. Please try again.");
-    if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)return oauthFail(env,url,"Google sign-in is not configured on the server.");
+    const googleClientId=envText(env,"GOOGLE_CLIENT_ID"),googleClientSecret=envText(env,"GOOGLE_CLIENT_SECRET");
+    if(!googleClientId||!googleClientSecret)return oauthFail(env,url,"This production deployment cannot see the Google OAuth variables. Check /api/auth/diagnostics and redeploy Production.");
     const redirectUri=`${site}/api/auth/google/callback`;
-    const form=new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,code,grant_type:"authorization_code",redirect_uri:redirectUri});
+    const form=new URLSearchParams({client_id:googleClientId,client_secret:googleClientSecret,code,grant_type:"authorization_code",redirect_uri:redirectUri});
     const tr=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});
     const td=await tr.json().catch(()=>({}));
     if(!tr.ok||!td.id_token)return oauthFail(env,url,`Google rejected the login configuration${td.error_description?": "+clean(td.error_description,160):"."}`);
     const vr=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(td.id_token));const g=await vr.json().catch(()=>({}));
-    if(!vr.ok||g.aud!==env.GOOGLE_CLIENT_ID||g.email_verified!=="true"||!g.sub||!g.email)return oauthFail(env,url,"Google could not verify this account and email.");
+    if(!vr.ok||g.aud!==googleClientId||g.email_verified!=="true"||!g.sub||!g.email)return oauthFail(env,url,"Google could not verify this account and email.");
     if(g.nonce&&g.nonce!==nonce)return oauthFail(env,url,"Google sign-in nonce did not match. Please try again.");
     const email=normalizeEmail(g.email);let u=await env.DB.prepare("SELECT * FROM users WHERE (provider='google' AND provider_id=?) OR email=? LIMIT 1").bind(g.sub,email).first();
     if(!u){let username=normalizeUsername(email.split("@")[0]);if(username.length<3)username="user_"+g.sub.slice(-6);while(await env.DB.prepare("SELECT id FROM users WHERE username=?").bind(username).first())username=(username.slice(0,15)+Math.floor(Math.random()*9999)).slice(0,20);const id=uid();await env.DB.prepare("INSERT INTO users(id,email,username,display_name,avatar,provider,provider_id,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,email,username,clean(g.name||username,24),clean(g.picture||"/assets/default-avatar.svg",500),"google",g.sub,Date.now()).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first();}
@@ -83,14 +99,15 @@ export default {async fetch(req,env){
    }catch(e){return oauthFail(env,url,"Google server error: "+clean(e?.message||e,180));}
   }
   if(path==="/auth/discord/start"&&req.method==="GET"){
-   if(!env.DISCORD_CLIENT_ID||!env.DISCORD_CLIENT_SECRET)return oauthFail(env,url,"Discord sign-in is not configured yet.");
-   const site=safeSite(env,url),state=uid(),redirectUri=`${site}/api/auth/discord/callback`;const redirect=new URL("https://discord.com/oauth2/authorize");redirect.searchParams.set("client_id",env.DISCORD_CLIENT_ID);redirect.searchParams.set("response_type","code");redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("scope","identify email");redirect.searchParams.set("state",state);redirect.searchParams.set("prompt","consent");
+   const discordClientId=envText(env,"DISCORD_CLIENT_ID"),discordClientSecret=envText(env,"DISCORD_CLIENT_SECRET");
+   if(!discordClientId||!discordClientSecret)return oauthFail(env,url,"This production deployment cannot see DISCORD_CLIENT_ID and/or DISCORD_CLIENT_SECRET. Open /api/auth/diagnostics, confirm both flags are true, then redeploy Production.");
+   const site=safeSite(env,url),state=uid(),redirectUri=`${site}/api/auth/discord/callback`;const redirect=new URL("https://discord.com/oauth2/authorize");redirect.searchParams.set("client_id",discordClientId);redirect.searchParams.set("response_type","code");redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("scope","identify email");redirect.searchParams.set("state",state);redirect.searchParams.set("prompt","consent");
    return redirectWithCookies(redirect.toString(),[oauthCookie("otl_discord_state",state)]);
   }
   if(path==="/auth/discord/callback"&&req.method==="GET"){
    try{
     const code=url.searchParams.get("code"),state=url.searchParams.get("state"),cookie=cookieValue(req,"otl_discord_state");if(url.searchParams.get("error"))return oauthFail(env,url,"Discord sign-in was cancelled.");if(!code||!state||!cookie||state!==cookie)return oauthFail(env,url,"Discord sign-in state expired. Try again.");
-    const site=safeSite(env,url),redirectUri=`${site}/api/auth/discord/callback`;const form=new URLSearchParams({client_id:env.DISCORD_CLIENT_ID,client_secret:env.DISCORD_CLIENT_SECRET,grant_type:"authorization_code",code,redirect_uri:redirectUri});
+    const discordClientId=envText(env,"DISCORD_CLIENT_ID"),discordClientSecret=envText(env,"DISCORD_CLIENT_SECRET");if(!discordClientId||!discordClientSecret)return oauthFail(env,url,"This production deployment cannot see the Discord OAuth variables. Check /api/auth/diagnostics and redeploy Production.");const site=safeSite(env,url),redirectUri=`${site}/api/auth/discord/callback`;const form=new URLSearchParams({client_id:discordClientId,client_secret:discordClientSecret,grant_type:"authorization_code",code,redirect_uri:redirectUri});
     const tr=await fetch("https://discord.com/api/oauth2/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});const td=await tr.json().catch(()=>({}));if(!tr.ok||!td.access_token)return oauthFail(env,url,"Discord rejected the login configuration.");
     const ur=await fetch("https://discord.com/api/users/@me",{headers:{authorization:`Bearer ${td.access_token}`}});const g=await ur.json().catch(()=>({}));if(!ur.ok||!g.id||!g.email||g.verified!==true)return oauthFail(env,url,"Discord did not provide a verified email.");
     let u=await env.DB.prepare("SELECT * FROM users WHERE provider_id=? AND provider='discord'").bind(g.id).first();
