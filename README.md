@@ -1,3 +1,7 @@
+# Ohio Trade Lab V48
+
+V48 fixes stale Developer UI state. The server session is now the source of truth, the developer panel always starts closed, logout removes legacy browser login state, and the button is labeled **Open Developer Tools** so having the Developer role is not confused with currently being inside a mode.
+
 # Ohio Trade Lab V46
 
 This build automatically creates the required D1 tables on the first API request. It fixes `D1_ERROR: no such table: users` and also creates the listings, bids, rooms, messages, notifications, and presence tables without deleting existing data.

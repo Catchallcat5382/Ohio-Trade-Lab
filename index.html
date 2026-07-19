@@ -1466,5 +1466,89 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <style id="v47-session-ui-fixes">
 #hubLocked{display:none!important}.hubGuest #onlineCreate,.hubGuest #onlineInbox{display:none!important}.hubGuest #logoutBtn,.hubGuest #saveDisplayBtn,.hubGuest #disableNotifyBtn{display:none!important}.hubGuest .onlineActions button{cursor:pointer}.guestBrowseNote{color:#9db0c7}.hubModal[hidden]{display:none!important}
 </style>
+
+<style id="v48-developer-state-fix">
+#developerModeBtn{display:none}
+#developerModeBtn[data-authorized="1"]{display:inline-block}
+#developerPanel:not(.open){display:none!important}
+</style>
+<script id="v48-developer-state-fix-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const API=()=>window.OTL_CONFIG?.apiBase||'/api';
+const TOKEN_KEY='otl_session_v37';
+let lastAuthorized=null;
+
+function closeDeveloperPanel(){
+  const panel=$('developerPanel');
+  if(panel){panel.classList.remove('open');panel.setAttribute('aria-hidden','true')}
+}
+function setDeveloperAccess(allowed){
+  const btn=$('developerModeBtn');
+  if(!btn)return;
+  if(allowed){
+    btn.dataset.authorized='1';
+    btn.style.display='inline-block';
+    btn.textContent='OPEN DEVELOPER TOOLS';
+    btn.title='Your account has the Developer role. Tools only open when you click this button.';
+  }else{
+    delete btn.dataset.authorized;
+    btn.style.display='none';
+    closeDeveloperPanel();
+  }
+  lastAuthorized=allowed;
+}
+async function serverUser(){
+  try{
+    const token=localStorage.getItem(TOKEN_KEY)||'';
+    const r=await fetch(API()+'/auth/me',{
+      credentials:'same-origin',
+      headers:token?{authorization:'Bearer '+token}:{}
+    });
+    if(!r.ok)return null;
+    const d=await r.json().catch(()=>({}));
+    return d?.user||null;
+  }catch(_){return undefined}
+}
+async function syncDeveloperState(){
+  const user=await serverUser();
+  if(user===undefined)return;
+  if(!user){
+    // The server is the source of truth on the deployed site. Remove stale browser-only login state.
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('otl_local_uid');
+    window.me=null;
+    setDeveloperAccess(false);
+    return;
+  }
+  window.me=user;
+  setDeveloperAccess(user.role==='developer'||user.role==='admin');
+}
+function install(){
+  closeDeveloperPanel();
+  const close=$('developerClose');
+  if(close)close.addEventListener('click',closeDeveloperPanel,true);
+  const logout=$('logoutBtn');
+  if(logout)logout.addEventListener('click',()=>{
+    closeDeveloperPanel();
+    setDeveloperAccess(false);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('otl_local_uid');
+    window.me=null;
+    setTimeout(syncDeveloperState,500);
+  },true);
+  window.addEventListener('pageshow',syncDeveloperState);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncDeveloperState()});
+  syncDeveloperState();
+  setInterval(()=>{
+    const role=window.me?.role;
+    const allowed=role==='developer'||role==='admin';
+    if(lastAuthorized!==allowed)setDeveloperAccess(allowed);
+  },750);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
 </body>
 </html>
