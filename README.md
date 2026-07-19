@@ -144,3 +144,12 @@ After redeploying, open the production site—not a preview deployment—and vis
 - `/api/auth/config` → should show `googleEnabled: true` and `discordEnabled: true`
 
 Then click the Google or Discord button.
+
+
+## V47 fixes
+- OAuth cookie sessions now restore visibly after Google/Discord callbacks.
+- Logout clears both the server HttpOnly cookie and browser fallback token.
+- Guests can browse the trade market and auctions but cannot post, bid, accept, use rooms, or see account controls.
+- Notification preference buttons now update and persist correctly.
+- Discord links verified accounts by email and returns useful callback errors.
+- Profile edits now update the visible account immediately.
