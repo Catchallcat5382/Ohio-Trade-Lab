@@ -40,6 +40,95 @@ const publicUser=u=>({id:u.id,username:u.username,displayName:u.display_name,ava
 const roleNames=new Set(['user','staff','developer']);
 const ownerEmails=env=>new Set(String(env.OWNER_EMAILS||'').split(',').map(normalizeEmail).filter(Boolean));
 async function applyVerifiedOwnerRole(env,user,email,isVerified){if(!user||!isVerified)return user;const normalized=normalizeEmail(email);if(normalized&&ownerEmails(env).has(normalized)&&user.role!=='developer'){await env.DB.prepare("UPDATE users SET role='developer' WHERE id=?").bind(user.id).run();user=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(user.id).first()}return user}
+
+async function ensureCoreSchema(env){
+ const statements=[
+  `CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL,
+    avatar TEXT NOT NULL DEFAULT '',
+    password_hash TEXT,
+    password_salt TEXT,
+    provider TEXT NOT NULL CHECK(provider IN ('email','google','discord')),
+    provider_id TEXT UNIQUE,
+    role TEXT NOT NULL DEFAULT 'user',
+    status TEXT NOT NULL DEFAULT 'active',
+    created INTEGER NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS listings (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL CHECK(type IN ('trade','auction')),
+    owner_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    give_json TEXT NOT NULL DEFAULT '[]',
+    want_json TEXT NOT NULL DEFAULT '[]',
+    category TEXT NOT NULL DEFAULT '',
+    preferred_section TEXT NOT NULL DEFAULT '',
+    preferred_set TEXT NOT NULL DEFAULT '',
+    min_bid_value INTEGER NOT NULL DEFAULT 0,
+    created INTEGER NOT NULL,
+    expires INTEGER NOT NULL,
+    completed INTEGER,
+    status TEXT NOT NULL DEFAULT 'open',
+    winning_bid_id TEXT,
+    FOREIGN KEY(owner_id) REFERENCES users(id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_listings_status_expires ON listings(status,expires)`,
+  `CREATE TABLE IF NOT EXISTS bids (
+    id TEXT PRIMARY KEY,
+    listing_id TEXT NOT NULL,
+    bidder_id TEXT NOT NULL,
+    items_json TEXT NOT NULL,
+    value INTEGER NOT NULL DEFAULT 0,
+    created INTEGER NOT NULL,
+    FOREIGN KEY(listing_id) REFERENCES listings(id),
+    FOREIGN KEY(bidder_id) REFERENCES users(id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_bids_listing_value ON bids(listing_id,value DESC,created ASC)`,
+  `CREATE TABLE IF NOT EXISTS rooms (
+    id TEXT PRIMARY KEY,
+    listing_id TEXT,
+    title TEXT NOT NULL,
+    member_a TEXT NOT NULL,
+    member_b TEXT NOT NULL,
+    created INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    FOREIGN KEY(member_a) REFERENCES users(id),
+    FOREIGN KEY(member_b) REFERENCES users(id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS messages (
+    id TEXT PRIMARY KEY,
+    room_id TEXT NOT NULL,
+    author_id TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created INTEGER NOT NULL,
+    system INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY(room_id) REFERENCES rooms(id),
+    FOREIGN KEY(author_id) REFERENCES users(id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS notifications (
+    id TEXT PRIMARY KEY,
+    recipient_id TEXT NOT NULL,
+    body TEXT NOT NULL,
+    room_id TEXT,
+    created INTEGER NOT NULL,
+    read INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY(recipient_id) REFERENCES users(id)
+  )`,
+  `CREATE TABLE IF NOT EXISTS presence (
+    visitor_id TEXT PRIMARY KEY,
+    user_id TEXT,
+    kind TEXT NOT NULL CHECK(kind IN ('guest','user','staff')),
+    last_seen INTEGER NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_presence_last_seen ON presence(last_seen)`
+ ];
+ for(const sql of statements) await env.DB.prepare(sql).run();
+}
+
 async function ensurePresenceTable(env){await env.DB.prepare("CREATE TABLE IF NOT EXISTS presence (visitor_id TEXT PRIMARY KEY,user_id TEXT,kind TEXT NOT NULL CHECK(kind IN ('guest','user','staff')),last_seen INTEGER NOT NULL)").run();await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_presence_last_seen ON presence(last_seen)").run()}
 async function finalizeAuctions(env){const now=Date.now();const {results}=await env.DB.prepare("SELECT * FROM listings WHERE type='auction' AND status='open' AND expires<=? LIMIT 100").bind(now).all();for(const row of results){const bid=await env.DB.prepare("SELECT * FROM bids WHERE listing_id=? ORDER BY value DESC,created ASC LIMIT 1").bind(row.id).first();if(!bid){await env.DB.prepare("UPDATE listings SET status='ended_no_bids' WHERE id=? AND status='open'").bind(row.id).run();continue}const room=uid(),created=Date.now();await env.DB.batch([env.DB.prepare("UPDATE listings SET status='delivery_pending',winning_bid_id=? WHERE id=? AND status='open'").bind(bid.id,row.id),env.DB.prepare("INSERT INTO rooms(id,listing_id,title,member_a,member_b,created,status) VALUES(?,?,?,?,?,?,?)").bind(room,row.id,row.title,row.owner_id,bid.bidder_id,created,"open"),env.DB.prepare("INSERT INTO messages(id,room_id,author_id,body,created,system) VALUES(?,?,?,?,?,1)").bind(uid(),room,row.owner_id,"Auction ended. The highest bidder and owner must complete the in-game trade. The owner must confirm delivery before the auction closes.",created),env.DB.prepare("INSERT INTO notifications(id,recipient_id,body,room_id,created) VALUES(?,?,?,?,?)").bind(uid(),row.owner_id,"Your auction ended with a winning skin bid. Delivery confirmation is required.",room,created),env.DB.prepare("INSERT INTO notifications(id,recipient_id,body,room_id,created) VALUES(?,?,?,?,?)").bind(uid(),bid.bidder_id,"You won an auction. Open the private room to complete the in-game trade.",room,created)]);}}
 export default {async fetch(req,env){
@@ -55,6 +144,7 @@ export default {async fetch(req,env){
   return json({error:"Database not configured",detail:message,requiredBinding:"DB"},503);
  }
  try{
+  await ensureCoreSchema(env);
   if(path==="/presence"&&req.method==="POST"){
    await ensurePresenceTable(env);
    const body=await req.json().catch(()=>({}));const me=await auth(req,env);const visitor=clean(body.visitorId,80)||uid();const kind=me?(me.role==="developer"||me.role==="admin"||me.role==="staff"?"staff":"user"):"guest";

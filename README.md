@@ -1,3 +1,9 @@
+# Ohio Trade Lab V46
+
+This build automatically creates the required D1 tables on the first API request. It fixes `D1_ERROR: no such table: users` and also creates the listings, bids, rooms, messages, notifications, and presence tables without deleting existing data.
+
+You still need a Cloudflare D1 binding named exactly `DB`. After deploying, open `/api/health`, then try Google or Discord sign-in again.
+
 # Ohio Trade Lab V45 — OAuth Environment Diagnostics Fix
 
 This build removes the misleading browser-side “not configured” block. Google and Discord buttons now always reach the server, which returns the real configuration result.
