@@ -214,3 +214,7 @@ Then click the Google or Discord button.
 - Notification preference buttons now update and persist correctly.
 - Discord links verified accounts by email and returns useful callback errors.
 - Profile edits now update the visible account immediately.
+
+## V65.1 push-detection rebuild
+
+This archive contains unique source changes compared with V65. The site exposes build `65.1.0` in `index.html`, the package version is updated, and `push.bat` prints the exact staged files before committing. Copy the contents of this archive into the root of the existing Git repository, replacing matching files, then run `push.bat`.
