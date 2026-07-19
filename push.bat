@@ -4,8 +4,8 @@ title Ohio Trade Lab V66 - Push to GitHub
 color 0A
 cd /d "%~dp0"
 
-set "EXPECTED_MARKER=OHIO TRADE LAB BUILD: V66 PRIVACY AND AUCTION RULES"
-set "EXPECTED_VERSION=66.0.0"
+set "EXPECTED_MARKER=OHIO TRADE LAB BUILD: V66.2 ACCOUNT INVENTORY FIX"
+set "EXPECTED_VERSION=66.2.0"
 set "DEFAULT_MSG=Ohio Trade Lab V66 privacy inventory auction and room fixes"
 
 echo ============================================================

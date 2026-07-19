@@ -228,4 +228,4 @@ Then click the Google or Discord button.
 
 ## V66 publisher
 
-The site exposes build `66.0.0` and contains the marker `OHIO TRADE LAB BUILD: V66 PRIVACY AND AUCTION RULES`. Copy every file into the root of the existing repository, replace matching files, and run the included V66 `push.bat`. It validates the build, runs checks, rebuilds `dist`, stages the changed files, commits, and pushes to `main`.
+The site exposes build `66.2.0` and contains the marker `OHIO TRADE LAB BUILD: V66.2 ACCOUNT INVENTORY FIX`. Copy every file into the root of the existing repository, replace matching files, and run the included V66 `push.bat`. It validates the build, runs checks, rebuilds `dist`, stages the changed files, commits, and pushes to `main`.

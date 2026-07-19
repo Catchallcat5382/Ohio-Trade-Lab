@@ -294,7 +294,7 @@ input:focus,select:focus{border-color:#824fc0}
  <section id="categories" class="page"><div class="panel"><div class="dataWarning">Select a category to browse its entries.</div><div id="categoryCards" class="categoryCards"></div></div></section>
 
  <section id="inventory" class="page"><div class="panel">
-  <div class="inventoryHero"><div><h2>MY INVENTORY</h2><p>Choose the guns or items you own from the catalog. Your inventory saves automatically on this device.</p></div><div class="inventoryActions"><button class="clear" id="clearInventoryBtn">CLEAR INVENTORY</button></div></div>
+  <div class="inventoryHero"><div><h2>MY INVENTORY</h2><p>Choose the guns or items you own from the catalog. Signed-in inventories save to that account. Guest inventory is temporary and clears on refresh or tab close.</p></div><div class="inventoryActions"><button class="clear" id="clearInventoryBtn">CLEAR INVENTORY</button></div></div>
   <div class="inventoryPickerPanel">
    <div class="inventoryPickerTitle"><b>ADD TO INVENTORY</b><span>Search the catalog and add items directly from their image cards.</span></div>
    <div class="inventoryPickerControls visualPickerControls"><input id="inventoryPickerSearch" placeholder="Search guns, skins, sets, or items..."><select id="inventoryPickerSection"><option value="">All sections</option></select></div>
@@ -2134,8 +2134,8 @@ setInterval(live,10000);setTimeout(()=>{const c=$('marketCount');if(c&&!document
 
 <!-- OHIO TRADE LAB BUILD: V66 PRIVACY AND AUCTION RULES -->
 <script id="v651-build-marker">
-window.OHIO_TRADE_LAB_BUILD = "66.0.0";
-console.info("Ohio Trade Lab build 66.0.0 loaded");
+window.OHIO_TRADE_LAB_BUILD = "66.2.0";
+console.info("Ohio Trade Lab build 66.2.0 loaded");
 </script>
 
 <script id="v66-privacy-room-actions-fix">
@@ -2144,6 +2144,101 @@ const old=window.otlOpenRoomV64;
 async function req(path,opt={}){const base=String(window.OTL_CONFIG?.apiBase||'/api').replace(/\/$/,'');const r=await fetch(base+path,{credentials:'include',cache:'no-store',headers:{'content-type':'application/json'},...opt});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d}
 window.otlOpenRoomV64=async id=>{if(old)await old(id);try{const {room:r}=await req('/rooms/'+encodeURIComponent(id));const bar=document.querySelector('#tradeRoom .roomActionBar');if(!bar||r.status!=='open')return;if(r.listingType==='auction'){bar.innerHTML=r.isOwner?`<button class="cancel" onclick="otlRoomActionV64('${id}','cancel')">CANCEL AUCTION</button>`:'';}else{bar.innerHTML=`<button class="confirm" onclick="otlRoomActionV64('${id}','confirm')">CONFIRM TRADE</button>${r.isOwner?`<button class="deny" onclick="otlRoomActionV64('${id}','deny')">DENY & REOPEN</button>`:''}<button class="cancel" onclick="otlRoomActionV64('${id}','cancel')">CANCEL THIS MATCH</button>`}}catch(e){console.error(e)}};
 const originalSet=window.OTL_setSessionUser;window.OTL_setSessionUser=async user=>{if(originalSet)await originalSet(user);if(user?.needsDisplayName){document.getElementById('accountDisplay').value='';document.getElementById('notifyStateAccount').textContent='Choose a custom anonymous display name. Your real Google or Discord name is never shown.';document.getElementById('hubAccountModal').hidden=false}};
+})();
+</script>
+
+
+
+<!-- OHIO TRADE LAB BUILD: V66.2 ACCOUNT INVENTORY FIX -->
+<script id="v662-account-inventory-fix">
+(()=>{'use strict';
+const PREFIX='ohioTradeLabInventoryV1:';
+const $=id=>document.getElementById(id);
+const cleanRows=rows=>(Array.isArray(rows)?rows:[]).map(r=>({id:String(r?.id??r?.itemId??''),quantity:Math.max(0,Math.min(999,Math.floor(Number(r?.quantity)||0)))})).filter(r=>r.id&&r.quantity);
+const userId=()=>String(window.me?.id||localStorage.getItem('otl_local_uid')||'').trim();
+const accountKey=id=>PREFIX+id;
+const apiBase=()=>String(window.OTL_CONFIG?.apiBase||window.OHIO_TRADE_LAB_CONFIG?.apiBase||'/api').replace(/\/$/,'');
+let activeId='__boot__',syncTimer=0,loading=false;
+let legacyGuest=[];
+try{legacyGuest=cleanRows(JSON.parse(localStorage.getItem(PREFIX+'guest')||'[]'))}catch{}
+
+function setRows(rows){
+  const next=cleanRows(rows);
+  try{inventory.splice(0,inventory.length,...next)}catch{try{inventory=next}catch{}}
+  try{window.inventory=inventory}catch{}
+  try{renderInventory();fillInventoryPicker()}catch{}
+  document.dispatchEvent(new CustomEvent('otl:inventory-changed',{detail:{inventory:next,userId:userId()||null}}));
+}
+function currentRows(){try{return cleanRows(inventory)}catch{return[]}}
+function persistAccountLocal(id,rows){try{localStorage.setItem(accountKey(id),JSON.stringify(cleanRows(rows)))}catch{}}
+async function pushServer(rows){
+  const id=userId(); if(!id)return;
+  try{await fetch(apiBase()+'/inventory/sync',{method:'POST',credentials:'include',cache:'no-store',headers:{'content-type':'application/json'},body:JSON.stringify({inventory:cleanRows(rows)})})}catch(e){console.warn('Inventory sync failed',e)}
+}
+function scheduleServerSync(rows){clearTimeout(syncTimer);syncTimer=setTimeout(()=>pushServer(rows),250)}
+
+window.OTL_inventoryRows=()=>currentRows();
+window.OTL_inventoryUserId=()=>userId()||null;
+
+// Replace the old fixed-at-page-load save function.
+window.saveInventory=saveInventory=function(){
+  const id=userId(),rows=currentRows();
+  if(!id){
+    // Guests are intentionally memory-only: refresh or closing the tab clears them.
+    try{localStorage.removeItem(PREFIX+'guest');sessionStorage.removeItem(PREFIX+'guest')}catch{}
+    document.dispatchEvent(new CustomEvent('otl:inventory-changed',{detail:{inventory:rows,userId:null}}));
+    return;
+  }
+  persistAccountLocal(id,rows);
+  scheduleServerSync(rows);
+  document.dispatchEvent(new CustomEvent('otl:inventory-changed',{detail:{inventory:rows,userId:id}}));
+};
+
+async function loadFor(id){
+  if(loading)return; loading=true;
+  try{
+    if(!id){
+      try{localStorage.removeItem(PREFIX+'guest');sessionStorage.removeItem(PREFIX+'guest')}catch{}
+      setRows([]);
+      return;
+    }
+    let local=[];try{local=cleanRows(JSON.parse(localStorage.getItem(accountKey(id))||'[]'))}catch{}
+    let server=[],serverWorked=false;
+    try{
+      const r=await fetch(apiBase()+'/inventory',{credentials:'include',cache:'no-store'});
+      if(r.ok){const d=await r.json();server=cleanRows(d.inventory);serverWorked=true}
+    }catch{}
+    let chosen=server.length?server:local;
+    // Recover items written to the old shared guest key by the V66.0 bug.
+    if(!chosen.length&&legacyGuest.length){
+      chosen=legacyGuest;
+      legacyGuest=[];
+      try{localStorage.removeItem(PREFIX+'guest')}catch{}
+      persistAccountLocal(id,chosen);
+      await pushServer(chosen);
+      const st=$('status');if(st)st.textContent='Your inventory was recovered and attached to this account.';
+    }else if(serverWorked){
+      persistAccountLocal(id,chosen);
+    }
+    setRows(chosen);
+  }finally{loading=false}
+}
+async function watchIdentity(){
+  const id=userId();
+  if(id===activeId)return;
+  activeId=id;
+  await loadFor(id);
+}
+
+// Make every inventory reader use the active in-memory account inventory.
+document.addEventListener('otl:inventory-changed',()=>{
+  const id=userId();if(id)persistAccountLocal(id,currentRows());
+});
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{activeId='__boot__';watchIdentity()});else watchIdentity();
+setInterval(watchIdentity,300);
+window.addEventListener('pageshow',watchIdentity);
+window.addEventListener('focus',watchIdentity);
 })();
 </script>
 
