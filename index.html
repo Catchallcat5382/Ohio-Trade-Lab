@@ -1295,10 +1295,10 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  const money=v=>window.money?window.money(v):'$'+Number(v||0).toLocaleString(); const itemByIdSafe=id=>(window.itemById?window.itemById(id):(window.items||[]).find(x=>String(x.id)===String(id)));
  const imageOf=x=>x&&(x.image||x.img||x.imageUrl||x.icon||''); const rarity=x=>String(x?.rarity||'legendary').toLowerCase()==='mythic'?'mythic':'legendary';
  let me=null, listings=[], inbox=[], activeRoom=null, selectedAuctionItem=null;
- const token=()=>localStorage.getItem(TOKEN_KEY)||'';
+ const token=()=>''; // V49: same-origin secure cookie is the only server session source
  async function api(path,opt={}){try{const r=await fetch(API+path,{credentials:'same-origin',...opt,headers:{'content-type':'application/json',...(opt.headers||{}),...(token()?{authorization:'Bearer '+token()}:{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.detail?`${d.error||'Request failed'}: ${d.detail}`:(d.error||'Request failed'));return d}catch(e){if(API==='/api')return null;throw e}}
  function localState(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY))||{users:{},listings:[],rooms:{},notifications:[]}}catch{return{users:{},listings:[],rooms:{},notifications:[]}}} function saveLocal(st){localStorage.setItem(LOCAL_KEY,JSON.stringify(st))}
- function setAuth(user,tok){me=user||null;window.me=me;if(tok)localStorage.setItem(TOKEN_KEY,tok);renderAuth();loadHub().catch(e=>{const st=$('status');if(st)st.textContent=e.message})}
+ function setAuth(user,tok){me=user||null;window.me=me;localStorage.removeItem(TOKEN_KEY);renderAuth();loadHub().catch(e=>{const st=$('status');if(st)st.textContent=e.message})}
  function renderAuth(){const on=!!me;window.me=me;$('hubSignedOut').hidden=on;$('hubSignedIn').hidden=!on;$('hubLocked').hidden=true;$('hubContent').hidden=false;if(on){$('hubDisplayName').textContent=me.displayName||'Trader';$('hubAccountName').textContent='@'+(me.username||'user');$('hubAvatar').src=me.avatar||'assets/default-avatar.svg';$('accountDisplay').value=me.displayName||'';$('accountUsername').textContent='@'+(me.username||'user')}document.body.classList.toggle('hubGuest',!on);const note=$('onlineModeNote');if(note)note.textContent=on?'Signed in. Your account, listings, rooms, and notifications are synced securely.':'Guest mode: you can browse trades and auctions. Sign in to post, bid, accept trades, use rooms, or manage an account.'}
  function modal(id,on=true){$(id).hidden=!on}
  function notifyState(){const disabled=localStorage.getItem('otl_notifications_disabled')==='1',p=('Notification'in window)?Notification.permission:'unsupported';const text=disabled?'Website notification popups are turned off.':p==='granted'?'Browser notifications are on.':p==='denied'?'Browser notifications are blocked in browser settings.':'Browser notifications are off.';$('notifyState').textContent=text;if($('notifyStateAccount'))$('notifyStateAccount').textContent=text;$('notifyBtn').textContent=!disabled&&p==='granted'?'NOTIFICATIONS ON':'TURN ON NOTIFICATIONS';if($('disableNotifyBtn'))$('disableNotifyBtn').textContent=disabled?'NOTIFICATIONS ARE OFF':'TURN OFF WEBSITE NOTIFICATIONS'}
@@ -1318,7 +1318,7 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  async function loadHub(){const d=await api('/listings');if(d?.listings){listings=d.listings}else{const st=localState();listings=st.listings.map(x=>({...x,mine:!!me&&x.ownerId===me.id}))}if(me){const n=await api('/notifications');inbox=n?.notifications||localState().notifications.filter(x=>x.recipientId===me.id)}else inbox=[];renderMarket();renderInbox();renderPreview()}
  function renderInbox(){$('onlineInboxList').innerHTML=inbox.length?inbox.map(n=>`<div class="inboxEntry"><b>${esc(n.body||n.text)}</b><div class="marketMeta">${new Date(n.created||n.time).toLocaleString()}</div>${n.roomId?`<button class="onlinePrimary" onclick="otlOpenRoom('${n.roomId}')">OPEN ROOM</button>`:''}</div>`).join(''):'<div class="emptyState">No notifications yet.</div>'}
  async function loginEmail(register=false){const pre=register?'register':'login',email=$(pre+'Email').value.trim().toLowerCase(),password=$(pre+'Password').value;const body=register?{email,password,username:$('registerUsername').value.trim(),displayName:$('registerDisplay').value.trim()}:{email,password};$('authMessage').textContent='Working...';const d=await api('/auth/'+(register?'register':'login'),{method:'POST',body:JSON.stringify(body)});if(d?.token){setAuth(d.user,d.token);modal('hubAuthModal',false);$('authMessage').textContent='';return}if(API==='/api'){const st=localState();if(register){if(!email||password.length<10)return $('authMessage').textContent='Use a valid email and a password of at least 10 characters.';if(Object.values(st.users).some(u=>u.email===email))return $('authMessage').textContent='That email is already registered.';const id=crypto.randomUUID(),u={id,email,username:clean(body.username,20).replace(/[^a-z0-9_]/gi,'').toLowerCase(),displayName:clean(body.displayName,24)||'Trader'};st.users[id]={...u,password};saveLocal(st);localStorage.setItem('otl_local_uid',id);setAuth(u,'local:'+id)}else{const u=Object.values(st.users).find(u=>u.email===email&&u.password===password);if(!u)return $('authMessage').textContent='Incorrect email or password.';localStorage.setItem('otl_local_uid',u.id);setAuth(u,'local:'+u.id)}modal('hubAuthModal',false)}else $('authMessage').textContent='Login failed. Check the backend setup.'}
- async function restore(){const qp=new URLSearchParams(location.search),oauthToken=qp.get('auth_token');if(oauthToken){localStorage.setItem(TOKEN_KEY,oauthToken);qp.delete('auth_token');history.replaceState({},'',location.pathname+(qp.toString()?'?'+qp:'')+location.hash)}try{const d=await api('/auth/me');if(d?.user){me=d.user;window.me=me;renderAuth();await loadHub();return}}catch(e){}const id=localStorage.getItem('otl_local_uid'),u=localState().users[id];if(u){me=u;window.me=me;renderAuth();await loadHub()}else{me=null;window.me=null;renderAuth();await loadHub()}}
+ async function restore(){localStorage.removeItem(TOKEN_KEY);const qp=new URLSearchParams(location.search),oauthToken=qp.get('auth_token');if(oauthToken){qp.delete('auth_token');history.replaceState({},'',location.pathname+(qp.toString()?'?'+qp:'')+location.hash)}try{const d=await api('/auth/me');if(d?.user){me=d.user;window.me=me;renderAuth();await loadHub();return}}catch(e){}const id=localStorage.getItem('otl_local_uid'),u=localState().users[id];if(u){me=u;window.me=me;renderAuth();await loadHub()}else{me=null;window.me=null;renderAuth();await loadHub()}}
  function filterText(v){const t=clean(v,500);const bad=/(discord\.gg|bit\.ly|tinyurl|password|passcode|login\s*code|verification\s*code|cookie|token|credit\s*card|cashapp|venmo|paypal|address|phone\s*number|dox|kill\s*yourself)/i;if(bad.test(t))throw new Error('Text blocked by the safety filter. Remove links, payment requests, passwords, login codes, threats, or personal information.');return t}
  async function postListing(type){try{if(!me)throw Error('Log in first.');const title=filterText($(type==='auction'?'auctionTitle':'listingTitle').value),description=filterText($(type==='auction'?'auctionDescription':'listingDescription').value);let give,want=[],extra={};if(type==='auction'){if(!selectedAuctionItem)throw Error('Choose an auction item.');give=[selectedAuctionItem.id];extra={preferredSection:$('auctionSection').value,preferredSet:$('auctionSet').value,minBidValue:num($('auctionMinValue').value)}}else{give=(window.trade?.yours||[]).slice(0,8).map(x=>x.id);want=(window.trade?.theirs||[]).slice(0,8).map(x=>x.id);if(!give.length)throw Error('Add at least one item to Your Offer.');extra={category:$('listingCategory').value}}const hours=Number($(type==='auction'?'auctionDuration':'listingExpiry').value),payload={type,title,description,give,want,expires:Date.now()+hours*36e5,...extra};const d=await api('/listings',{method:'POST',body:JSON.stringify(payload)});if(!d&&API==='/api'){const st=localState();st.listings.push({...payload,id:crypto.randomUUID(),ownerId:me.id,ownerDisplay:me.displayName,ownerUsername:me.username,created:Date.now(),status:'open',bids:[],mine:true});saveLocal(st)}$('status').textContent=type==='auction'?'Auction posted.':'Trade listing posted.';await loadHub()}catch(e){$('status').textContent=e.message}}
  async function roomOpen(id){const d=await api('/rooms/'+id);let room=d?.room;if(!room&&API==='/api')room=localState().rooms[id];if(!room)return;activeRoom=id;localStorage.setItem(ROOM_KEY,id);$('tradeRoom').innerHTML=`<div class="roomHeader"><div><b>${esc(room.title)}</b><div class="marketMeta">Private room · ${room.membersDisplay?.map(esc).join(' and ')||'two verified accounts'}</div></div></div><div class="roomMessages" id="roomMessages">${(room.messages||[]).map(m=>`<div class="roomMessage ${m.authorId===me.id||m.author===me.displayName?'mine':''}"><b>${esc(m.authorDisplay||m.author)}</b><div>${esc(m.body||m.text)}</div></div>`).join('')}</div><div class="roomComposer"><input id="roomInput" maxlength="300" placeholder="Discuss the in-game trade. Never share passwords, codes, email, phone, or payment info."><button class="onlinePrimary" onclick="otlSendRoom('${id}')">SEND</button></div>`}
@@ -1350,7 +1350,7 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
  const LOCAL_KEY_V38='otl_online_v38';
  const OLD_LOCAL_KEYS=['otl_online_v37','otl_online_v36','otl_online_v35'];
  const apiBase=()=>window.OTL_CONFIG?.apiBase||'/api';
- const authToken=()=>localStorage.getItem('otl_session_v37')||'';
+ const authToken=()=>'';
  function migrateLocal(){
    if(localStorage.getItem(LOCAL_KEY_V38))return;
    for(const key of OLD_LOCAL_KEYS){const raw=localStorage.getItem(key);if(raw){localStorage.setItem(LOCAL_KEY_V38,raw);return}}
@@ -1447,7 +1447,7 @@ window.addEventListener("DOMContentLoaded",loadDatabase);
 const $=id=>document.getElementById(id), API=()=>window.OTL_CONFIG?.apiBase||'/api';
 const guestKey='otl_presence_visitor_v41';let visitor=localStorage.getItem(guestKey);if(!visitor){visitor=crypto.randomUUID();localStorage.setItem(guestKey,visitor)}
 let oauthConfig={discordEnabled:false,googleEnabled:false,ownerBootstrapConfigured:false,siteUrl:''};
-async function request(path,opt={}){const token=localStorage.getItem('otl_session_v37')||'';const r=await fetch(API()+path,{credentials:'same-origin',...opt,headers:{'content-type':'application/json',...(opt.headers||{}),...(token?{authorization:'Bearer '+token}:{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d}
+async function request(path,opt={}){const r=await fetch(API()+path,{credentials:'same-origin',cache:'no-store',...opt,headers:{'content-type':'application/json',...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d}
 async function loadOAuthConfig(){try{oauthConfig=await request('/auth/config');window.OTL_RUNTIME_AUTH=oauthConfig}catch(e){oauthConfig={googleEnabled:false,discordEnabled:false}}}
 function authMessage(t){const x=$('authMessage');if(x)x.textContent=t}
 function googleSignIn(){
@@ -1501,11 +1501,7 @@ function setDeveloperAccess(allowed){
 }
 async function serverUser(){
   try{
-    const token=localStorage.getItem(TOKEN_KEY)||'';
-    const r=await fetch(API()+'/auth/me',{
-      credentials:'same-origin',
-      headers:token?{authorization:'Bearer '+token}:{}
-    });
+    const r=await fetch(API()+'/auth/me',{credentials:'same-origin',cache:'no-store'});
     if(!r.ok)return null;
     const d=await r.json().catch(()=>({}));
     return d?.user||null;
@@ -1550,5 +1546,67 @@ function install(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
 </script>
+
+<style id="v49-auth-hub-authority-fix">
+#hubContent{display:block!important}
+body.hubGuest #hubSignedIn{display:none!important}
+body:not(.hubGuest) #hubSignedOut{display:none!important}
+.sessionRoleBadge{display:inline-flex;align-items:center;padding:3px 8px;border:1px solid #344765;border-radius:999px;color:#9fb2ca;font-size:10px;margin-left:5px}
+</style>
+<script id="v49-auth-hub-authority-fix-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const API=()=>window.OTL_CONFIG?.apiBase||'/api';
+const LEGACY_KEYS=['otl_session_v37','otl_session_v38','otl_auth_token','auth_token'];
+function clearLegacy(){for(const key of LEGACY_KEYS)localStorage.removeItem(key)}
+async function getServerUser(){
+  const r=await fetch(API()+'/auth/me',{credentials:'same-origin',cache:'no-store'});
+  if(r.status===401)return null;
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||'Could not check login');
+  return d.user||null;
+}
+function paint(user){
+  window.me=user||null;
+  document.body.classList.toggle('hubGuest',!user);
+  const out=$('hubSignedOut'),inside=$('hubSignedIn'),content=$('hubContent'),locked=$('hubLocked');
+  if(out)out.hidden=!!user;if(inside)inside.hidden=!user;if(content)content.hidden=false;if(locked)locked.hidden=true;
+  if(user){
+    if($('hubDisplayName'))$('hubDisplayName').textContent=user.displayName||'Trader';
+    if($('hubAccountName'))$('hubAccountName').textContent='@'+(user.username||'user');
+    if($('hubAvatar'))$('hubAvatar').src=user.avatar||'assets/default-avatar.svg';
+    if($('accountUsername'))$('accountUsername').textContent='@'+(user.username||'user');
+    if($('accountDisplay'))$('accountDisplay').value=user.displayName||'';
+  }
+  const note=$('onlineModeNote');
+  if(note)note.textContent=user?'Signed in as @'+(user.username||'user')+'. The Online Hub is unlocked and synced.':'Guest mode: the trade market and auctions remain visible. Sign in only for posting, bidding, rooms, and account tools.';
+}
+async function authoritativeRefresh(){
+  clearLegacy();
+  try{const user=await getServerUser();paint(user);if(typeof window.loadHub==='function')await window.loadHub()}
+  catch(e){paint(null);const n=$('onlineModeNote');if(n)n.textContent='Guest browsing is available. Login status could not be checked: '+e.message}
+}
+async function forceLogout(){
+  clearLegacy();
+  try{await fetch(API()+'/auth/logout',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'content-type':'application/json'},body:'{}'})}catch(_){ }
+  localStorage.removeItem('otl_local_uid');
+  paint(null);
+  document.getElementById('hubAccountModal')?.setAttribute('hidden','');
+  await authoritativeRefresh();
+}
+function install(){
+  clearLegacy();
+  const logout=$('logoutBtn');if(logout)logout.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();forceLogout()},true);
+  const google=$('googleLoginBtn');if(google)google.onclick=()=>{clearLegacy();location.href=API()+'/auth/google/start'};
+  const discord=$('discordLoginBtn');if(discord)discord.onclick=()=>{clearLegacy();location.href=API()+'/auth/discord/start'};
+  window.addEventListener('pageshow',authoritativeRefresh);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)authoritativeRefresh()});
+  authoritativeRefresh();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
+
 </body>
 </html>

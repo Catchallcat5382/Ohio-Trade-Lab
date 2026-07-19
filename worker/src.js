@@ -34,7 +34,7 @@ const b64u=bytes=>btoa(String.fromCharCode(...bytes)).replace(/\+/g,"-").replace
 const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)),c=>c.charCodeAt(0));
 async function hmac(secret,text){const key=await crypto.subtle.importKey("raw",enc.encode(secret),{name:"HMAC",hash:"SHA-256"},false,["sign"]);return new Uint8Array(await crypto.subtle.sign("HMAC",key,enc.encode(text)))}
 async function tokenFor(env,user){const payload=b64u(enc.encode(JSON.stringify({sub:user.id,exp:Date.now()+30*864e5})));return payload+"."+b64u(await hmac(env.SESSION_SECRET,payload))}
-async function auth(req,env){const raw=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"")||decodeURIComponent(cookieValue(req,"otl_session")||"");if(!raw)return null;const [p,s]=raw.split(".");if(!p||!s)return null;const expected=await hmac(env.SESSION_SECRET,p);const got=unb64u(s);if(expected.length!==got.length)return null;let ok=true;for(let i=0;i<got.length;i++)ok&&=expected[i]===got[i];if(!ok)return null;let data;try{data=JSON.parse(new TextDecoder().decode(unb64u(p)))}catch{return null}if(data.exp<Date.now())return null;return env.DB.prepare("SELECT id,email,username,display_name,avatar,role,status FROM users WHERE id=? AND status='active'").bind(data.sub).first()}
+async function auth(req,env){const raw=decodeURIComponent(cookieValue(req,"otl_session")||"")||(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");if(!raw)return null;const [p,s]=raw.split(".");if(!p||!s)return null;const expected=await hmac(env.SESSION_SECRET,p);const got=unb64u(s);if(expected.length!==got.length)return null;let ok=true;for(let i=0;i<got.length;i++)ok&&=expected[i]===got[i];if(!ok)return null;let data;try{data=JSON.parse(new TextDecoder().decode(unb64u(p)))}catch{return null}if(data.exp<Date.now())return null;return env.DB.prepare("SELECT id,email,username,display_name,avatar,role,status FROM users WHERE id=? AND status='active'").bind(data.sub).first()}
 async function hashPassword(password,salt){const base=await crypto.subtle.importKey("raw",enc.encode(password),"PBKDF2",false,["deriveBits"]);const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:enc.encode(salt),iterations:210000},base,256);return b64u(new Uint8Array(bits))}
 const publicUser=u=>({id:u.id,username:u.username,displayName:u.display_name,avatar:u.avatar||"/assets/default-avatar.svg",role:u.role});
 const roleNames=new Set(['user','staff','developer']);
@@ -156,7 +156,11 @@ export default {async fetch(req,env){
    await ensurePresenceTable(env);
    const cutoff=Date.now()-90000;const rows=(await env.DB.prepare("SELECT kind,COUNT(*) n FROM presence WHERE last_seen>=? GROUP BY kind").bind(cutoff).all()).results;const counts={guest:0,user:0,staff:0,total:0};for(const r of rows){counts[r.kind]=Number(r.n)||0;counts.total+=Number(r.n)||0}return json({counts});
   }
-  if(path==="/auth/logout"&&req.method==="POST")return json({ok:true},200,{"set-cookie":clearSessionCookie()});
+  if(path==="/auth/logout"&&(req.method==="POST"||req.method==="GET")){
+   const current=await auth(req,env).catch(()=>null);
+   if(current&&env.DB){await env.DB.prepare("DELETE FROM presence WHERE user_id=?").bind(current.id).run().catch(()=>{});}
+   return json({ok:true,authenticated:false},200,{"set-cookie":clearSessionCookie(),"cache-control":"no-store"});
+  }
 
   if(path==="/auth/google/start"&&req.method==="GET"){
    const googleClientId=envText(env,"GOOGLE_CLIENT_ID"),googleClientSecret=envText(env,"GOOGLE_CLIENT_SECRET");
@@ -227,7 +231,7 @@ export default {async fetch(req,env){
    return json({listings:results,authenticated:Boolean(me)});
   }
   if(!me)return json({error:"Authentication required"},401);
-  if(path==="/auth/me")return json({user:publicUser(me)});
+  if(path==="/auth/me")return json({user:publicUser(me)},200,{"cache-control":"no-store"});
   if(path==="/auth/profile"&&req.method==="POST"){const b=await req.json(),display=clean(b.displayName,24);if(display.length<2||blocked(display))return json({error:"Invalid display name"},400);await env.DB.prepare("UPDATE users SET display_name=? WHERE id=?").bind(display,me.id).run();const u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(me.id).first();return json({user:publicUser(u)});}
   await finalizeAuctions(env);
   if(path==="/listings"&&req.method==="POST"){
