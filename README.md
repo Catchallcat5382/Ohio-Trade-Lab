@@ -1,3 +1,7 @@
+# Ohio Trade Lab V55
+
+V55 fixes OAuth/session restoration, private email reveal controls, immediate account refresh, multi-item auction validation, owned-item bid enforcement, inventory synchronization after completion, profile restoration, presence handling, and safer developer tools with explicit email reveal and user lookup.
+
 # Ohio Trade Lab V54
 
 ## V54 changes
