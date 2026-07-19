@@ -1,3 +1,27 @@
+# Ohio Trade Lab V54
+
+## V54 changes
+
+- Trades and auctions reload into the market immediately after posting.
+- Posting forms clear and return to the market automatically.
+- Auctions support up to eight owned items.
+- Auctions require a starting value of at least 1 and limit it to about 15% above the selected items’ combined catalog value.
+- Optional buyout items can be selected from inventory.
+- Profile display name, secure HTTPS profile image URL, and public bio are editable.
+- Inventory is synchronized with D1 before listings are created.
+- Completing an auction or accepted trade removes the exchanged items from the corresponding server inventory for convenience.
+- Developer overview includes online/offline accounts, profiles, listings, rooms, and moderated room messages.
+- Developer data now requires a separate `ADMIN_ACCESS_CODE` Cloudflare secret in addition to a developer account. Do not use your Windows PIN.
+- Logout and session checks close the developer panel and update the visible signed-in state.
+
+## Required Cloudflare secret
+
+Add a secret named `ADMIN_ACCESS_CODE` containing a strong, separate access code. This must not be the same as your Windows PIN, Google password, or Discord password.
+
+## Database
+
+The Worker automatically applies missing V54 columns and creates `user_inventory`. The included migration is `worker/migrations/0006_v54_market_profiles_inventory_admin.sql`. Existing databases may report duplicate-column messages if you manually run a migration after the Worker has already upgraded the schema.
+
 # Ohio Trade Lab V52
 
 V52 requires a confirmed server session before any Online Hub market, trade, auction, inbox, or room content is displayed. It also replaces the item-card-only selectors with clear category and item dropdowns, image/value previews, and add/remove controls for trade items.
