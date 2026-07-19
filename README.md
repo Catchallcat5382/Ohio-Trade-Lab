@@ -1,3 +1,7 @@
+# Ohio Trade Lab V52
+
+V52 requires a confirmed server session before any Online Hub market, trade, auction, inbox, or room content is displayed. It also replaces the item-card-only selectors with clear category and item dropdowns, image/value previews, and add/remove controls for trade items.
+
 # Ohio Trade Lab V51
 
 V51 adds direct image item pickers for Post Trade and Auctions, fixes account display-name saving, and blocks guest access to posting, auction creation, inbox, bidding, accepting, and account management. Public market browsing remains available.
