@@ -210,3 +210,11 @@ Then click the Google or Discord button.
 - Notification preference buttons now update and persist correctly.
 - Discord links verified accounts by email and returns useful callback errors.
 - Profile edits now update the visible account immediately.
+
+
+## V56 fixes
+- Emails stay hidden throughout the website and are fetched only when explicitly revealed in My Account or the protected admin panel.
+- Admin access codes must be entered again after every page refresh or browser reopen.
+- Admins can permanently remove broken auctions/listings and related bids/rooms.
+- User wording replaces trader wording.
+- Profile images accept HTTPS URLs, file selection, or drag-and-drop image uploads.
