@@ -1912,5 +1912,74 @@ function boot(){hidePrivateIdentity();setInterval(hidePrivateIdentity,500);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
+
+<style id="v59-auction-corrections-style">
+#v54AuctionPickers,#v53AuctionPicker,#v52AuctionPicker{display:none!important}
+.v59-auction-builder{display:grid;gap:10px;margin-top:8px;padding:12px;border:1px solid #30415e;border-radius:12px;background:#09111e}
+.v59-auction-builder h4{margin:0;color:#ead9f6}.v59-auction-builder p{margin:0;color:#91a0b8;font-size:11px}
+.v59-picker-search{width:100%;background:#08111f;border:1px solid #344765;color:#eef4ff;border-radius:8px;padding:10px}
+.v59-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-height:285px;overflow:auto}
+.v59-pick{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid #344765;background:#070d17;color:#fff;border-radius:9px;padding:7px;text-align:left;cursor:pointer}
+.v59-pick:hover{border-color:#9a43ca}.v59-pick:disabled{opacity:.45;cursor:not-allowed}.v59-pick img{width:56px;height:52px;object-fit:contain}.v59-pick b{font-size:11px;overflow-wrap:anywhere}.v59-pick small{display:block;color:#91a0b8;font-size:9px}.v59-pick strong{color:#6ee7ad;font-size:10px}
+.v59-selected{display:flex;gap:7px;flex-wrap:wrap;min-height:34px}.v59-chip{display:flex;align-items:center;gap:6px;border:1px solid #60457b;background:#181025;border-radius:999px;padding:5px 8px;font-size:10px}.v59-chip img{width:26px;height:26px;object-fit:contain}.v59-chip button{border:0;background:transparent;color:#ff9bab;font-size:17px;cursor:pointer}
+@media(max-width:760px){.v59-picker-grid{grid-template-columns:1fr 1fr}}@media(max-width:480px){.v59-picker-grid{grid-template-columns:1fr}}
+</style>
+<script id="v59-auction-corrections-script">
+(()=>{
+'use strict';
+const byId=id=>document.getElementById(id);
+const apiBase=()=>String(window.OTL_CONFIG?.apiBase||window.OHIO_TRADE_LAB_CONFIG?.apiBase||'/api').replace(/\/$/,'');
+const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cash=n=>window.money?window.money(Number(n)||0):'$'+Math.round(Number(n)||0).toLocaleString();
+const catalog=()=>{let a=window.items;try{if(!Array.isArray(a)&&typeof items!=='undefined')a=items}catch{}return Array.isArray(a)?a:[]};
+const image=x=>x?.imageUrl||x?.image||x?.img||x?.icon||'';
+function localInventory(){
+ try{const a=JSON.parse(localStorage.getItem('ohioTradeLabInventoryV1')||'[]');return Array.isArray(a)?a.map(r=>({id:String(r.id),quantity:Math.max(0,Math.floor(Number(r.quantity)||0))})).filter(r=>r.quantity):[]}catch{return[]}
+}
+function ownedCatalog(){const m=new Map(localInventory().map(r=>[r.id,r.quantity]));return catalog().filter(x=>m.has(String(x.id))).map(x=>({...x,ownedQuantity:m.get(String(x.id))}))}
+const state={give:[],buyout:[]};
+const item=id=>catalog().find(x=>String(x.id)===String(id));
+const count=(arr,id)=>arr.filter(v=>v===String(id)).length;
+function selectedHTML(kind){const arr=state[kind];return arr.length?arr.map((id,i)=>{const x=item(id);return x?`<span class="v59-chip">${image(x)?`<img src="${safe(image(x))}" alt="">`:''}<b>${safe(x.name)}</b><button type="button" data-v59-remove="${kind}" data-index="${i}">×</button></span>`:''}).join(''):'<small>No items selected.</small>'}
+function renderSelected(){if(byId('v59AuctionSelected'))byId('v59AuctionSelected').innerHTML=selectedHTML('give');if(byId('v59BuyoutSelected'))byId('v59BuyoutSelected').innerHTML=selectedHTML('buyout')}
+function renderPool(kind){
+ const host=byId(kind==='give'?'v59AuctionPool':'v59BuyoutPool');if(!host)return;
+ const q=String(byId(kind==='give'?'v59AuctionSearch':'v59BuyoutSearch')?.value||'').toLowerCase().trim();
+ const pool=(kind==='give'?ownedCatalog():catalog()).filter(x=>!q||[x.name,x.set,x.section,x.category,x.weapon].join(' ').toLowerCase().includes(q)).slice(0,120);
+ host.innerHTML=pool.length?pool.map(x=>{const limit=kind==='give'?Number(x.ownedQuantity)||0:8;const left=limit-count(state[kind],x.id);return `<button type="button" class="v59-pick" data-v59-add="${kind}" data-id="${safe(x.id)}" ${left<=0?'disabled':''}>${image(x)?`<img src="${safe(image(x))}" alt="">`:'<span></span>'}<span><b>${safe(x.name)}</b><small>${safe(x.set||x.section||x.category||'Item')}${kind==='give'?` · Owned ×${x.ownedQuantity}`:' · Requested buyout item'}</small></span><strong>${cash(x.value)}</strong></button>`}).join(''):'<div class="v54-security-note">'+(kind==='give'?'No owned inventory items found. Add them in the Inventory tab first.':'No matching catalog items.')+'</div>';
+}
+function installAuctionBuilder(){
+ document.querySelectorAll('#v54AuctionPickers,#v53AuctionPicker,#v52AuctionPicker,.v51-picker[data-side="auction"],.v52-picker[data-kind="auction"],.v53-picker[data-kind="auction"]').forEach(x=>x.remove());
+ const form=byId('onlineAuction')?.querySelector('.onlineFormCard');if(!form)return;
+ byId('auctionItemSearch')?.closest('label')?.remove();byId('auctionItemResults')?.remove();byId('auctionItem')?.remove();
+ if(!byId('v59AuctionBuilder')){
+  const box=document.createElement('div');box.id='v59AuctionBuilder';box.className='v59-auction-builder';
+  box.innerHTML=`<h4>ADD ITEMS TO AUCTION</h4><p>These are the items you are giving. Only items actually in your Inventory can be selected.</p><input id="v59AuctionSearch" class="v59-picker-search" placeholder="Search your inventory..."><div id="v59AuctionSelected" class="v59-selected"></div><div id="v59AuctionPool" class="v59-picker-grid"></div><h4>OPTIONAL INSTANT BUYOUT</h4><p>Choose the item or items you want to receive for an instant win. Buyout choices come from the full catalog, not your inventory.</p><input id="v59BuyoutSearch" class="v59-picker-search" placeholder="Search all items for the buyout you want..."><div id="v59BuyoutSelected" class="v59-selected"></div><div id="v59BuyoutPool" class="v59-picker-grid"></div>`;
+  form.insertBefore(box,byId('postAuctionBtn'));
+  byId('v59AuctionSearch').addEventListener('input',()=>renderPool('give'));byId('v59BuyoutSearch').addEventListener('input',()=>renderPool('buyout'));
+ }
+ renderSelected();renderPool('give');renderPool('buyout');
+}
+async function jsonFetch(path,opt={}){const r=await fetch(apiBase()+path,{credentials:'include',cache:'no-store',headers:{'content-type':'application/json',...(opt.headers||{})},...opt});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d}
+function total(ids){return ids.reduce((n,id)=>n+(Number(item(id)?.value)||0),0)}
+async function postAuction(){
+ const me=await jsonFetch('/auth/me').then(d=>d.user).catch(()=>null);if(!me)return alert('Sign in first.');
+ const title=String(byId('auctionTitle')?.value||'').trim(),description=String(byId('auctionDescription')?.value||'').trim();if(title.length<3)return alert('Add a title of at least 3 characters.');if(!state.give.length)return alert('Add at least one item from your inventory to the auction.');
+ const inv=localInventory(),map=new Map(inv.map(x=>[x.id,x.quantity])),counts={};for(const id of state.give)counts[id]=(counts[id]||0)+1;for(const [id,q] of Object.entries(counts))if((map.get(id)||0)<q)return alert('One of the selected auction items is no longer in your Inventory. Refresh the Inventory tab and select it again.');
+ const min=Math.floor(Number(String(byId('auctionMinValue')?.value||'').replace(/[^0-9.]/g,''))||0),max=Math.max(1,Math.floor(total(state.give)*1.15));if(min<1)return alert('Minimum bid value is required and must be at least 1.');if(min>max)return alert(`Minimum bid value is too high. It can be at most ${cash(max)} for the selected auction items.`);
+ await jsonFetch('/inventory/sync',{method:'POST',body:JSON.stringify({inventory:inv})});
+ const payload={type:'auction',title,description,give:[...state.give],want:[],buyout:[...state.buyout],minBidValue:min,maxBidValue:max,preferredSection:byId('auctionSection')?.value||'',preferredSet:byId('auctionSet')?.value||'',expires:Date.now()+(Number(byId('auctionDuration')?.value)||24)*3600000,inventorySnapshot:inv};
+ await jsonFetch('/listings',{method:'POST',body:JSON.stringify(payload)});
+ state.give=[];state.buyout=[];['auctionTitle','auctionDescription','auctionMinValue'].forEach(id=>{if(byId(id))byId(id).value=''});renderSelected();renderPool('give');renderPool('buyout');
+ const tab=document.querySelector('.onlineTab[data-online-view="market"]');tab?.click();await window.loadHub?.();window.renderMarket?.();if(byId('status'))byId('status').textContent='Auction posted and added to the market.';
+}
+function bindPost(){const old=byId('postAuctionBtn');if(!old||old.dataset.v59==='1')return;const fresh=old.cloneNode(true);fresh.dataset.v59='1';old.replaceWith(fresh);fresh.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();postAuction().catch(err=>alert(err.message))},true)}
+function bindLogoutRefresh(){const old=byId('logoutBtn');if(!old||old.dataset.v59logout==='1')return;const fresh=old.cloneNode(true);fresh.dataset.v59logout='1';old.replaceWith(fresh);fresh.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();try{await fetch(apiBase()+'/auth/logout',{method:'POST',credentials:'include',cache:'no-store',headers:{'content-type':'application/json'},body:'{}'})}catch{}try{for(const k of ['otl_session_v37','otl_session_v38','otl_auth_token','auth_token','otl_local_uid'])localStorage.removeItem(k)}catch{}location.reload()},true)}
+document.addEventListener('click',e=>{const add=e.target.closest('[data-v59-add]');if(add){e.preventDefault();const kind=add.dataset.v59Add,id=String(add.dataset.id),arr=state[kind];if(arr.length>=8)return alert('You can select up to 8 items.');if(kind==='give'){const row=ownedCatalog().find(x=>String(x.id)===id);if(!row)return alert('That item is not currently in your Inventory.');if(count(arr,id)>=row.ownedQuantity)return alert('You do not own another copy of that item.')}arr.push(id);renderSelected();renderPool(kind);return}const rem=e.target.closest('[data-v59-remove]');if(rem){e.preventDefault();state[rem.dataset.v59Remove].splice(Number(rem.dataset.index),1);renderSelected();renderPool(rem.dataset.v59Remove)}},true);
+function boot(){installAuctionBuilder();bindPost();bindLogoutRefresh();const obs=new MutationObserver(()=>{if(document.querySelector('#v54AuctionPickers,#v53AuctionPicker,#v52AuctionPicker'))installAuctionBuilder();bindPost();bindLogoutRefresh()});obs.observe(document.body,{childList:true,subtree:true});setTimeout(()=>{installAuctionBuilder();bindPost();bindLogoutRefresh()},1600)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,900));else setTimeout(boot,900);
+})();
+</script>
+
 </body>
 </html>
