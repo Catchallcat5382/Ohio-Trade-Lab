@@ -1973,6 +1973,7 @@ async function postAuction(){
  state.give=[];state.buyout=[];['auctionTitle','auctionDescription','auctionMinValue'].forEach(id=>{if(byId(id))byId(id).value=''});renderSelected();renderPool('give');renderPool('buyout');
  const tab=document.querySelector('.onlineTab[data-online-view="market"]');tab?.click();await window.loadHub?.();window.renderMarket?.();if(byId('status'))byId('status').textContent='Auction posted and added to the market.';
 }
+window.__otlV59PostAuction=postAuction;
 function bindPost(){const old=byId('postAuctionBtn');if(!old||old.dataset.v59==='1')return;const fresh=old.cloneNode(true);fresh.dataset.v59='1';old.replaceWith(fresh);fresh.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();postAuction().catch(err=>alert(err.message))},true)}
 function bindLogoutRefresh(){const old=byId('logoutBtn');if(!old||old.dataset.v59logout==='1')return;const fresh=old.cloneNode(true);fresh.dataset.v59logout='1';old.replaceWith(fresh);fresh.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();try{await fetch(apiBase()+'/auth/logout',{method:'POST',credentials:'include',cache:'no-store',headers:{'content-type':'application/json'},body:'{}'})}catch{}try{for(const k of ['otl_session_v37','otl_session_v38','otl_auth_token','auth_token','otl_local_uid'])localStorage.removeItem(k)}catch{}location.reload()},true)}
 document.addEventListener('click',e=>{const add=e.target.closest('[data-v59-add]');if(add){e.preventDefault();const kind=add.dataset.v59Add,id=String(add.dataset.id),arr=state[kind];if(arr.length>=8)return alert('You can select up to 8 items.');if(kind==='give'){const row=ownedCatalog().find(x=>String(x.id)===id);if(!row)return alert('That item is not currently in your Inventory.');if(count(arr,id)>=row.ownedQuantity)return alert('You do not own another copy of that item.')}arr.push(id);renderSelected();renderPool(kind);return}const rem=e.target.closest('[data-v59-remove]');if(rem){e.preventDefault();state[rem.dataset.v59Remove].splice(Number(rem.dataset.index),1);renderSelected();renderPool(rem.dataset.v59Remove)}},true);
@@ -1981,5 +1982,65 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<script id="v60-auction-submit-routing-fix">
+(()=>{
+'use strict';
+let busy=false;
+window.addEventListener('click',event=>{
+ const button=event.target?.closest?.('#postAuctionBtn');
+ if(!button)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ if(busy)return;
+ const selected=document.querySelectorAll('#v59AuctionSelected [data-v59-remove="give"]').length;
+ if(!selected){alert('Add at least one item from your inventory to the auction.');return;}
+ if(typeof window.__otlV59PostAuction!=='function'){
+   alert('The auction form is still loading. Please try again in a moment.');
+   return;
+ }
+ busy=true;
+ Promise.resolve(window.__otlV59PostAuction())
+   .catch(error=>alert(error?.message||'Could not post auction.'))
+   .finally(()=>{busy=false});
+},true);
+})();
+</script>
+
+
+<style id="v61-final-picker-fix-style">
+#v61TradeBuilder{margin:12px 0}.v61-note{font-size:11px;color:#9fb1c8;margin:4px 0 10px}
+</style>
+<script id="v61-final-picker-fix">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const base=()=>String(window.OTL_CONFIG?.apiBase||window.OHIO_TRADE_LAB_CONFIG?.apiBase||'/api').replace(/\/$/,'');
+const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const catalog=()=>Array.isArray(window.items)?window.items:[];
+const image=x=>x?.imageUrl||x?.image||x?.img||x?.icon||'';
+const money=n=>window.money?window.money(Number(n)||0):'$'+Math.round(Number(n)||0).toLocaleString();
+const state={give:[],want:[]};
+function inventory(){try{const rows=JSON.parse(localStorage.getItem('ohioTradeLabInventoryV1')||'[]');return Array.isArray(rows)?rows.map(r=>({id:String(r.id),quantity:Math.max(0,Math.floor(Number(r.quantity)||0))})).filter(r=>r.quantity):[]}catch{return[]}}
+function owned(){const m=new Map(inventory().map(r=>[r.id,r.quantity]));return catalog().filter(x=>m.has(String(x.id))).map(x=>({...x,ownedQuantity:m.get(String(x.id))}))}
+function item(id){return catalog().find(x=>String(x.id)===String(id))}
+function count(arr,id){return arr.filter(v=>v===String(id)).length}
+function selected(kind){const arr=state[kind],host=$(kind==='give'?'v61GiveSelected':'v61WantSelected');if(!host)return;host.innerHTML=arr.length?arr.map((id,i)=>{const x=item(id);return x?`<span class="v59-chip">${image(x)?`<img src="${safe(image(x))}" alt="">`:''}<b>${safe(x.name)}</b><button type="button" data-v61-remove="${kind}" data-index="${i}">×</button></span>`:''}).join(''):'<small>No items selected.</small>'}
+function pool(kind){const host=$(kind==='give'?'v61GivePool':'v61WantPool');if(!host)return;const q=String($(kind==='give'?'v61GiveSearch':'v61WantSearch')?.value||'').toLowerCase().trim();const rows=(kind==='give'?owned():catalog()).filter(x=>!q||[x.name,x.set,x.section,x.category,x.weapon].join(' ').toLowerCase().includes(q)).slice(0,160);host.innerHTML=rows.length?rows.map(x=>{const limit=kind==='give'?Number(x.ownedQuantity)||0:8,left=limit-count(state[kind],x.id);return `<button type="button" class="v59-pick" data-v61-add="${kind}" data-id="${safe(x.id)}" ${left<=0?'disabled':''}>${image(x)?`<img src="${safe(image(x))}" alt="">`:'<span></span>'}<span><b>${safe(x.name)}</b><small>${safe(x.set||x.section||x.category||'Item')}${kind==='give'?` · Owned ×${x.ownedQuantity}`:' · Full catalog'}</small></span><strong>${money(x.value)}</strong></button>`}).join(''):`<div class="v54-security-note">${kind==='give'?'No owned inventory items found. Add items in the Inventory tab first.':'No matching catalog items.'}</div>`}
+function installTrade(){
+ document.querySelectorAll('#v53TradePickers,#v52TradePickers,.v51-picker').forEach(el=>{if(el.closest('#onlineCreate'))el.remove()});
+ const form=$('onlineCreate')?.querySelector('.onlineFormCard');if(!form)return;
+ if(!$('v61TradeBuilder')){const box=document.createElement('div');box.id='v61TradeBuilder';box.innerHTML=`<h4>ITEMS YOU GIVE</h4><p class="v61-note">Only items you actually own can be offered.</p><input id="v61GiveSearch" class="v59-picker-search" placeholder="Search your inventory..."><div id="v61GiveSelected" class="v59-selected"></div><div id="v61GivePool" class="v59-picker-grid"></div><h4>ITEMS YOU WANT</h4><p class="v61-note">Choose from the full item catalog. These do not need to be in your inventory.</p><input id="v61WantSearch" class="v59-picker-search" placeholder="Search all items..."><div id="v61WantSelected" class="v59-selected"></div><div id="v61WantPool" class="v59-picker-grid"></div>`;form.insertBefore(box,form.querySelector('label')||form.firstChild);$('v61GiveSearch').addEventListener('input',()=>pool('give'));$('v61WantSearch').addEventListener('input',()=>pool('want'))}
+ selected('give');selected('want');pool('give');pool('want');
+ const old=$('postTradeBtn');if(old){const fresh=old.cloneNode(true);fresh.id='postTradeBtnV61';old.replaceWith(fresh);fresh.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();postTrade().catch(err=>alert(err.message))},true)}
+}
+async function request(path,opt={}){const r=await fetch(base()+path,{credentials:'include',cache:'no-store',headers:{'content-type':'application/json',...(opt.headers||{})},...opt});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.error||'Request failed');return d}
+async function postTrade(){const u=await request('/auth/me').then(d=>d.user).catch(()=>null);if(!u)return alert('Sign in first.');const title=String($('listingTitle')?.value||'').trim(),description=String($('listingDescription')?.value||'').trim();if(title.length<3)return alert('Add a title of at least 3 characters.');if(!state.give.length)return alert('Add at least one item you own to Items You Give.');const inv=inventory(),map=new Map(inv.map(x=>[x.id,x.quantity])),counts={};for(const id of state.give)counts[id]=(counts[id]||0)+1;for(const [id,q] of Object.entries(counts))if((map.get(id)||0)<q)return alert('One of the items you are giving is no longer in your inventory.');await request('/inventory/sync',{method:'POST',body:JSON.stringify({inventory:inv})});await request('/listings',{method:'POST',body:JSON.stringify({type:'trade',title,description,give:[...state.give],want:[...state.want],category:$('listingCategory')?.value||'Open offers',expires:Date.now()+(Number($('listingExpiry')?.value)||24)*3600000,inventorySnapshot:inv})});state.give=[];state.want=[];['listingTitle','listingDescription'].forEach(id=>{if($(id))$(id).value=''});selected('give');selected('want');pool('give');pool('want');document.querySelector('.onlineTab[data-online-view="market"]')?.click();await window.loadHub?.();window.renderMarket?.();if($('status'))$('status').textContent='Trade posted and added to the market.'}
+function isolateAuctionButton(){const old=$('postAuctionBtn');if(!old)return;const fresh=old.cloneNode(true);fresh.id='postAuctionBtnV61';old.replaceWith(fresh);fresh.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();if(typeof window.__otlV59PostAuction!=='function')return alert('The auction form is still loading.');Promise.resolve(window.__otlV59PostAuction()).catch(err=>alert(err?.message||'Could not post auction.'))},true)}
+document.addEventListener('click',e=>{const add=e.target.closest('[data-v61-add]');if(add){e.preventDefault();const kind=add.dataset.v61Add,id=String(add.dataset.id),arr=state[kind];if(arr.length>=8)return alert('You can select up to 8 items.');if(kind==='give'){const row=owned().find(x=>String(x.id)===id);if(!row)return alert('That item is not currently in your inventory.');if(count(arr,id)>=row.ownedQuantity)return alert('You do not own another copy of that item.')}arr.push(id);selected(kind);pool(kind);return}const rem=e.target.closest('[data-v61-remove]');if(rem){e.preventDefault();state[rem.dataset.v61Remove].splice(Number(rem.dataset.index),1);selected(rem.dataset.v61Remove);pool(rem.dataset.v61Remove)}},true);
+function boot(){installTrade();isolateAuctionButton();setTimeout(()=>{installTrade();isolateAuctionButton()},1200)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(boot,2600));else setTimeout(boot,2600);
+})();
+</script>
 </body>
 </html>
