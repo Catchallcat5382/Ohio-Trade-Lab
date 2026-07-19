@@ -1,3 +1,9 @@
+# Ohio Trade Lab V51
+
+V51 adds direct image item pickers for Post Trade and Auctions, fixes account display-name saving, and blocks guest access to posting, auction creation, inbox, bidding, accepting, and account management. Public market browsing remains available.
+
+Cloudflare requirements remain unchanged: D1 binding named `DB` plus the OAuth/session environment variables.
+
 # Ohio Trade Lab V50
 
 V50 fixes the split authentication state that caused the header to show a signed-in user while Account, posting, auctions, and inbox still treated the same browser as logged out.
