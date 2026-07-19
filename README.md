@@ -1,4 +1,15 @@
-# Ohio Trade Lab V59
+# Ohio Trade Lab V66
+
+## V66 fixes
+
+- Per-account server inventory isolation.
+- Anonymous custom display names required for local, Google, and Discord accounts.
+- Discord authentication uses the Discord account identity without exposing its associated email publicly.
+- Trade cancellation reopens the listing instead of deleting it.
+- Only auction owners can cancel auctions; cancelling removes the auction.
+- Auction rooms open only for the demand-adjusted winning bidder after expiration.
+- Conflicting button handlers and room actions were repaired.
+- Live market refresh remains enabled every 10 seconds.
 
 # Ohio Trade Lab V57
 
@@ -215,6 +226,6 @@ Then click the Google or Discord button.
 - Discord links verified accounts by email and returns useful callback errors.
 - Profile edits now update the visible account immediately.
 
-## V65.1 push-detection rebuild
+## V66 publisher
 
-This archive contains unique source changes compared with V65. The site exposes build `65.1.0` in `index.html`, the package version is updated, and `push.bat` prints the exact staged files before committing. Copy the contents of this archive into the root of the existing Git repository, replacing matching files, then run `push.bat`.
+The site exposes build `66.0.0` and contains the marker `OHIO TRADE LAB BUILD: V66 PRIVACY AND AUCTION RULES`. Copy every file into the root of the existing repository, replace matching files, and run the included V66 `push.bat`. It validates the build, runs checks, rebuilds `dist`, stages the changed files, commits, and pushes to `main`.
