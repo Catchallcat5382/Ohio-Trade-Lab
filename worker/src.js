@@ -3,7 +3,14 @@ const json=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status
 const cookieValue=(req,name)=>(req.headers.get("cookie")||"").match(new RegExp("(?:^|;\\s*)"+name+"=([^;]+)"))?.[1]||"";
 const sessionCookie=(token,maxAge=2592000)=>`otl_session=${encodeURIComponent(token)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 const clearSessionCookie=()=>"otl_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0";
-const safeSite=(env,url)=>String(env.PUBLIC_SITE_URL||url.origin).replace(/\/$/,"");
+const safeSite=(env,url)=>{
+ const configured=String(env.PUBLIC_SITE_URL||"").trim().replace(/\/$/,"");
+ if(configured&&!/your[-.]actual[-.]domain/i.test(configured)){try{const u=new URL(configured);if(u.protocol==="https:")return u.origin}catch{}}
+ return url.origin;
+};
+const oauthCookie=(name,value,maxAge=600)=>`${name}=${encodeURIComponent(value)}; Path=/api/auth; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
+const clearOauthCookie=name=>`${name}=; Path=/api/auth; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+const redirectWithCookies=(location,cookies=[])=>{const h=new Headers({location,"cache-control":"no-store"});for(const c of cookies)h.append("set-cookie",c);return new Response(null,{status:302,headers:h})};
 const oauthFail=(env,url,message)=>new Response(null,{status:302,headers:{location:`${safeSite(env,url)}/?auth_error=${encodeURIComponent(message)}#online`}});
 const uid=()=>crypto.randomUUID();
 const clean=(v,n=500)=>String(v??"").replace(/[<>]/g,"").trim().slice(0,n);
@@ -28,7 +35,7 @@ export default {async fetch(req,env){
  const url=new URL(req.url),path=url.pathname.replace(/^\/api/,"");
  if(path==="/health")return json({ok:true});
  try{
-  if(path==="/auth/config"&&req.method==="GET")return json({googleClientId:env.GOOGLE_CLIENT_ID||"",discordEnabled:Boolean(env.DISCORD_CLIENT_ID&&env.DISCORD_CLIENT_SECRET),googleEnabled:Boolean(env.GOOGLE_CLIENT_ID),ownerBootstrapConfigured:Boolean(env.OWNER_EMAILS)});
+  if(path==="/auth/config"&&req.method==="GET")return json({googleEnabled:Boolean(env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET),discordEnabled:Boolean(env.DISCORD_CLIENT_ID&&env.DISCORD_CLIENT_SECRET),ownerBootstrapConfigured:Boolean(env.OWNER_EMAILS),siteUrl:safeSite(env,url)});
   if(path==="/presence"&&req.method==="POST"){
    await ensurePresenceTable(env);
    const body=await req.json().catch(()=>({}));const me=await auth(req,env);const visitor=clean(body.visitorId,80)||uid();const kind=me?(me.role==="developer"||me.role==="admin"||me.role==="staff"?"staff":"user"):"guest";
@@ -42,21 +49,49 @@ export default {async fetch(req,env){
   }
   if(path==="/auth/logout"&&req.method==="POST")return json({ok:true},200,{"set-cookie":clearSessionCookie()});
 
+  if(path==="/auth/google/start"&&req.method==="GET"){
+   if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)return oauthFail(env,url,"Google sign-in is not configured. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Cloudflare Production variables, then redeploy.");
+   const site=safeSite(env,url),state=uid(),nonce=uid(),redirectUri=`${site}/api/auth/google/callback`;
+   const redirect=new URL("https://accounts.google.com/o/oauth2/v2/auth");
+   redirect.searchParams.set("client_id",env.GOOGLE_CLIENT_ID);redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("response_type","code");redirect.searchParams.set("scope","openid email profile");redirect.searchParams.set("state",state);redirect.searchParams.set("nonce",nonce);redirect.searchParams.set("prompt","select_account");redirect.searchParams.set("access_type","online");
+   return redirectWithCookies(redirect.toString(),[oauthCookie("otl_google_state",state),oauthCookie("otl_google_nonce",nonce)]);
+  }
+  if(path==="/auth/google/callback"&&req.method==="GET"){
+   try{
+    const site=safeSite(env,url),code=url.searchParams.get("code"),state=url.searchParams.get("state"),savedState=decodeURIComponent(cookieValue(req,"otl_google_state")||""),nonce=decodeURIComponent(cookieValue(req,"otl_google_nonce")||"");
+    if(url.searchParams.get("error"))return oauthFail(env,url,"Google sign-in was cancelled.");
+    if(!code||!state||!savedState||state!==savedState||!nonce)return oauthFail(env,url,"Google sign-in state expired. Please try again.");
+    if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET)return oauthFail(env,url,"Google sign-in is not configured on the server.");
+    const redirectUri=`${site}/api/auth/google/callback`;
+    const form=new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,code,grant_type:"authorization_code",redirect_uri:redirectUri});
+    const tr=await fetch("https://oauth2.googleapis.com/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});
+    const td=await tr.json().catch(()=>({}));
+    if(!tr.ok||!td.id_token)return oauthFail(env,url,`Google rejected the login configuration${td.error_description?": "+clean(td.error_description,160):"."}`);
+    const vr=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(td.id_token));const g=await vr.json().catch(()=>({}));
+    if(!vr.ok||g.aud!==env.GOOGLE_CLIENT_ID||g.email_verified!=="true"||!g.sub||!g.email)return oauthFail(env,url,"Google could not verify this account and email.");
+    if(g.nonce&&g.nonce!==nonce)return oauthFail(env,url,"Google sign-in nonce did not match. Please try again.");
+    const email=normalizeEmail(g.email);let u=await env.DB.prepare("SELECT * FROM users WHERE (provider='google' AND provider_id=?) OR email=? LIMIT 1").bind(g.sub,email).first();
+    if(!u){let username=normalizeUsername(email.split("@")[0]);if(username.length<3)username="user_"+g.sub.slice(-6);while(await env.DB.prepare("SELECT id FROM users WHERE username=?").bind(username).first())username=(username.slice(0,15)+Math.floor(Math.random()*9999)).slice(0,20);const id=uid();await env.DB.prepare("INSERT INTO users(id,email,username,display_name,avatar,provider,provider_id,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,email,username,clean(g.name||username,24),clean(g.picture||"/assets/default-avatar.svg",500),"google",g.sub,Date.now()).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first();}
+    else if(u.provider!=="google"||u.provider_id!==g.sub){await env.DB.prepare("UPDATE users SET provider='google',provider_id=?,avatar=CASE WHEN avatar='' THEN ? ELSE avatar END WHERE id=?").bind(g.sub,clean(g.picture||"/assets/default-avatar.svg",500),u.id).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(u.id).first();}
+    u=await applyVerifiedOwnerRole(env,u,email,true);const t=await tokenFor(env,u);
+    return redirectWithCookies(`${site}/#online`,[sessionCookie(t),clearOauthCookie("otl_google_state"),clearOauthCookie("otl_google_nonce")]);
+   }catch(e){return oauthFail(env,url,"Google server error: "+clean(e?.message||e,180));}
+  }
   if(path==="/auth/discord/start"&&req.method==="GET"){
    if(!env.DISCORD_CLIENT_ID||!env.DISCORD_CLIENT_SECRET)return oauthFail(env,url,"Discord sign-in is not configured yet.");
-   const state=uid(),redirectUri=`${url.origin}/api/auth/discord/callback`;const redirect=new URL("https://discord.com/oauth2/authorize");redirect.searchParams.set("client_id",env.DISCORD_CLIENT_ID);redirect.searchParams.set("response_type","code");redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("scope","identify email");redirect.searchParams.set("state",state);redirect.searchParams.set("prompt","consent");
-   return new Response(null,{status:302,headers:{location:redirect.toString(),"set-cookie":`otl_discord_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`}});
+   const site=safeSite(env,url),state=uid(),redirectUri=`${site}/api/auth/discord/callback`;const redirect=new URL("https://discord.com/oauth2/authorize");redirect.searchParams.set("client_id",env.DISCORD_CLIENT_ID);redirect.searchParams.set("response_type","code");redirect.searchParams.set("redirect_uri",redirectUri);redirect.searchParams.set("scope","identify email");redirect.searchParams.set("state",state);redirect.searchParams.set("prompt","consent");
+   return redirectWithCookies(redirect.toString(),[oauthCookie("otl_discord_state",state)]);
   }
   if(path==="/auth/discord/callback"&&req.method==="GET"){
    try{
     const code=url.searchParams.get("code"),state=url.searchParams.get("state"),cookie=cookieValue(req,"otl_discord_state");if(url.searchParams.get("error"))return oauthFail(env,url,"Discord sign-in was cancelled.");if(!code||!state||!cookie||state!==cookie)return oauthFail(env,url,"Discord sign-in state expired. Try again.");
-    const redirectUri=`${url.origin}/api/auth/discord/callback`;const form=new URLSearchParams({client_id:env.DISCORD_CLIENT_ID,client_secret:env.DISCORD_CLIENT_SECRET,grant_type:"authorization_code",code,redirect_uri:redirectUri});
+    const site=safeSite(env,url),redirectUri=`${site}/api/auth/discord/callback`;const form=new URLSearchParams({client_id:env.DISCORD_CLIENT_ID,client_secret:env.DISCORD_CLIENT_SECRET,grant_type:"authorization_code",code,redirect_uri:redirectUri});
     const tr=await fetch("https://discord.com/api/oauth2/token",{method:"POST",headers:{"content-type":"application/x-www-form-urlencoded"},body:form});const td=await tr.json().catch(()=>({}));if(!tr.ok||!td.access_token)return oauthFail(env,url,"Discord rejected the login configuration.");
     const ur=await fetch("https://discord.com/api/users/@me",{headers:{authorization:`Bearer ${td.access_token}`}});const g=await ur.json().catch(()=>({}));if(!ur.ok||!g.id||!g.email||g.verified!==true)return oauthFail(env,url,"Discord did not provide a verified email.");
     let u=await env.DB.prepare("SELECT * FROM users WHERE provider_id=? AND provider='discord'").bind(g.id).first();
     if(!u){let username=normalizeUsername(g.username||"discord_user");if(username.length<3)username="user_"+g.id.slice(-6);while(await env.DB.prepare("SELECT id FROM users WHERE username=?").bind(username).first())username=username.slice(0,15)+Math.floor(Math.random()*9999);const id=uid(),avatar=g.avatar?`https://cdn.discordapp.com/avatars/${g.id}/${g.avatar}.png?size=128`:"/assets/default-avatar.svg";await env.DB.prepare("INSERT INTO users(id,email,username,display_name,avatar,provider,provider_id,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,normalizeEmail(g.email),username,clean(g.global_name||g.username||username,24),avatar,"discord",g.id,Date.now()).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first()}
     u=await applyVerifiedOwnerRole(env,u,g.email,g.verified===true);
-    const t=await tokenFor(env,u);return new Response(null,{status:302,headers:{location:`${safeSite(env,url)}/#online`,"set-cookie":[sessionCookie(t),"otl_discord_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0"].join(", ")}});
+    const t=await tokenFor(env,u);return redirectWithCookies(`${site}/#online`,[sessionCookie(t),clearOauthCookie("otl_discord_state")]);
    }catch(e){return oauthFail(env,url,"Discord sign-in failed. Check the OAuth settings.")}
   }
   if(path==="/auth/register"&&req.method==="POST"){
@@ -68,7 +103,7 @@ export default {async fetch(req,env){
   if(path==="/auth/login"&&req.method==="POST"){
    const b=await req.json(),email=normalizeEmail(b.email),password=String(b.password||""),u=await env.DB.prepare("SELECT * FROM users WHERE email=? AND provider='email'").bind(email).first();if(!u||u.status!=="active")return json({error:"Incorrect email or password"},401);const hash=await hashPassword(password,u.password_salt);if(hash!==u.password_hash)return json({error:"Incorrect email or password"},401);const t=await tokenFor(env,u);return json({token:t,user:publicUser(u)},200,{"set-cookie":sessionCookie(t)});
   }
-  if(path==="/auth/google"&&req.method==="POST"){
+  if(path==="/auth/google/token"&&req.method==="POST"){
    const b=await req.json();if(!b.credential||!env.GOOGLE_CLIENT_ID)return json({error:"Google login is not configured"},400);const vr=await fetch("https://oauth2.googleapis.com/tokeninfo?id_token="+encodeURIComponent(b.credential));const g=await vr.json();if(!vr.ok||g.aud!==env.GOOGLE_CLIENT_ID||g.email_verified!=="true")return json({error:"Google sign-in verification failed"},401);let u=await env.DB.prepare("SELECT * FROM users WHERE provider_id=? AND provider='google'").bind(g.sub).first();if(!u){let username=normalizeUsername((g.email||"user").split("@")[0]);if(username.length<3)username="user_"+g.sub.slice(-6);while(await env.DB.prepare("SELECT id FROM users WHERE username=?").bind(username).first())username=username.slice(0,15)+Math.floor(Math.random()*9999);const id=uid();await env.DB.prepare("INSERT INTO users(id,email,username,display_name,avatar,provider,provider_id,created) VALUES(?,?,?,?,?,?,?,?)").bind(id,normalizeEmail(g.email),username,clean(g.name||username,24),clean(g.picture,500),"google",g.sub,Date.now()).run();u=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first()}u=await applyVerifiedOwnerRole(env,u,g.email,g.email_verified==="true");const t=await tokenFor(env,u);return json({token:t,user:publicUser(u)},200,{"set-cookie":sessionCookie(t)});
   }
   const me=await auth(req,env);if(!me)return json({error:"Authentication required"},401);

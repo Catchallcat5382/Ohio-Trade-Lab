@@ -1,8 +1,6 @@
-/* Public runtime configuration. OAuth client IDs are loaded safely from /api/auth/config. */
+/* Public browser configuration. OAuth secrets stay only in Cloudflare. */
 window.OTL_CONFIG = Object.freeze({
   apiBase: '/api',
   forceBackend: true,
-  googleClientId: '',
-  discordEnabled: true,
   presenceIntervalMs: 30000
 });

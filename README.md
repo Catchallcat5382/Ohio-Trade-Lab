@@ -1,44 +1,74 @@
-# Ohio Trade Lab V41 — Live Presence + Secure OAuth
+# Ohio Trade Lab V43 — Redirect OAuth Fix
 
-## Cloudflare Pages build
-- Build command: `npm run build`
-- Output directory: `dist`
-- Root directory: leave blank
-- D1 binding name: `DB`
+This build replaces the blocked Google One Tap prompt with the normal Google OAuth account chooser. Google and Discord callbacks are generated from `PUBLIC_SITE_URL`, so the app no longer uses a placeholder domain or a changing preview deployment URL.
 
-Run every SQL migration in `worker/migrations` in numerical order. Migration `0004_discord_presence_sessions.sql` upgrades existing databases for Discord accounts and live presence.
+## Required Cloudflare Production variables
 
-## Required Cloudflare environment variables
-Set these under **Workers & Pages → your project → Settings → Variables and Secrets**:
+Open **Cloudflare Dashboard → Workers & Pages → Ohio Trade Lab → Settings → Variables and Secrets**. Add these under **Production**:
 
-- `SESSION_SECRET`: a long random secret (at least 32 characters)
-- `PUBLIC_SITE_URL`: your real site URL, for example `https://ohio-trade-lab.pages.dev`
-- `GOOGLE_CLIENT_ID`: the public Google Web Client ID
-- `DISCORD_CLIENT_ID`: Discord application client ID
-- `DISCORD_CLIENT_SECRET`: Discord application client secret (mark encrypted)
-- `OWNER_EMAILS`: comma-separated verified owner emails. Set this to `ilansheagoldstein@gmail.com`. A matching verified Google or Discord login is promoted to Developer on the server.
+### Plain variables
 
-## Google setup
-In Google Cloud Console create an OAuth 2.0 **Web application** client. Add both your Pages URL and custom domain under Authorized JavaScript origins. No secret is placed in `config.js`; the public client ID is loaded from `/api/auth/config`.
+- `PUBLIC_SITE_URL` = `https://ohio-trade-lab.pages.dev`
+- `GOOGLE_CLIENT_ID` = the Google OAuth Web application client ID
+- `DISCORD_CLIENT_ID` = the Discord Application ID
+- `OWNER_EMAILS` = `ilansheagoldstein@gmail.com`
 
-## Discord setup
-In Discord Developer Portal → OAuth2 add this exact redirect URL:
+### Encrypted secrets
 
-`https://YOUR-DOMAIN/api/auth/discord/callback`
+- `GOOGLE_CLIENT_SECRET` = the secret from the same Google OAuth Web client
+- `DISCORD_CLIENT_SECRET` = the Discord OAuth2 client secret
+- `SESSION_SECRET` = a random 32–64+ character value
 
-Use the same domain users open. The backend calculates this callback URL automatically. A failed OAuth attempt redirects back to the website with a readable error instead of a blank JSON page.
+Do not put quotes around the values. After saving them, create a new production deployment.
 
-## Sessions and presence
-Successful email, Google, and Discord logins set a `Secure`, `HttpOnly`, `SameSite=Lax` session cookie. A browser token remains supported for migration compatibility. Live presence counts active visitors from the previous 90 seconds as Guests, Users, or Staff and refreshes every 30 seconds.
+## Google Cloud settings
 
-Developer mode remains server-authorized by the account role in D1. Inspect Element cannot grant the role or access protected endpoints.
+For the OAuth client, application type must be **Web application**.
 
+Authorized JavaScript origin:
 
-## V42 fixes
-- Presence creates its own D1 table if migration 0005 was missed, so a guest heartbeat is counted immediately.
-- The browser shows itself as one guest while the first server heartbeat is loading or if the API is temporarily unavailable.
-- Verified owner bootstrap is server-side. Set `OWNER_EMAILS` to `ilansheagoldstein@gmail.com`; only a verified Google/Discord email match receives Developer. Inspect Element and localStorage cannot grant this role.
-- Developer Mode can assign User or Staff roles from the protected account table. Role changes are checked by the server.
-- Email/password registrations are not automatically promoted from OWNER_EMAILS because this build does not yet verify email ownership. Sign in with Google or Discord for the first owner bootstrap, or update the D1 role manually.
+`https://ohio-trade-lab.pages.dev`
 
-Run `worker/migrations/0005_presence_and_staff_roles.sql` after the earlier migrations.
+Authorized redirect URI:
+
+`https://ohio-trade-lab.pages.dev/api/auth/google/callback`
+
+The redirect URI must match exactly. Do not add a trailing slash.
+
+## Discord Developer Portal settings
+
+In **OAuth2 → Redirects**, add:
+
+`https://ohio-trade-lab.pages.dev/api/auth/discord/callback`
+
+Save changes. Copy the Application ID into `DISCORD_CLIENT_ID`, and save the client secret as the encrypted `DISCORD_CLIENT_SECRET` in Cloudflare.
+
+## D1 binding
+
+Your D1 database binding must be named exactly:
+
+`DB`
+
+Apply all SQL files in `worker/migrations` in numerical order if they have not already been applied.
+
+## What was fixed
+
+- Normal Google redirect login instead of the browser-blocked One Tap prompt.
+- Server-side Google authorization-code exchange.
+- Secure OAuth state and nonce cookies.
+- Secure 30-day `HttpOnly` session cookie.
+- OAuth callbacks always use `PUBLIC_SITE_URL`.
+- Discord no longer redirects to `your-actual-domain.com`.
+- Existing accounts can be matched by verified email.
+- The verified owner email is promoted to developer only on the server.
+- Emails and provider IDs remain private and are not exposed in public profiles.
+- Invalid `_redirects` loop rule removed.
+
+## Testing
+
+After redeploying, open the production site—not a preview deployment—and visit:
+
+- `/api/health` → should show `{ "ok": true }`
+- `/api/auth/config` → should show `googleEnabled: true` and `discordEnabled: true`
+
+Then click the Google or Discord button.
